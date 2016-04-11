@@ -1,0 +1,60 @@
+User Manual Controls:
+FIRST READ THE README FILE FOR BUILD AND RUNNING INFORMATION
+(Don't read README.md)
+
+
+Goals of the single player game:
+	Get as many points as possible before you lose all your lives!
+
+Goals of the multiplayer game:
+	As the paddle (the circular controller) your goal is to hit the goal (the square paddle) as much as possible until you run out of lives. 
+	The goal's incentive is to avoid the ball as much as possible to mitigate how many points the player will get. The Goal's high score is indicated by the timer in the bottom right, the higher the better.
+
+Controls for single player:
+	The game starts in Single player mode
+
+	Move the mouse at the start to control the paddle.
+
+	If you run out of lives paddle controls are disabled.
+
+	Press "E" to toggle the paddle controls, which are controlled with the mouse.
+		When paddle controls are disabled, you have freelook control over the camera.
+
+	Press "C" if you would like to change the camera to a 3rd person, behind the paddle view of the game,
+		If you press "C" again the camera will not follow the paddle anymore. If you lose the game then you can free look around by pressing "C".
+
+	Press "Q" to hit the ball towards your paddle, but use it wisely as you could end up losing lives because of it.
+
+	You can zoom in and out and shift the movement of the camera with the "WASD" keys, hold shift to move faster. 
+
+	Press "." to increase the background music.
+
+	Press "," to decrease the background music.
+
+	Press "b" to toggle background music.
+
+	Press "M" to toggle sound effects, they play by default.
+
+
+Setting up Multiplayer:
+	When the game starts and you want to play multiplayer you need:
+	1. Press E to gain control of the Mouse
+	2. Show your IP (which is in the bottom left corner) to the person you want to join your game
+	3. Then you can press the HOST button in the top left corner, you are now the server
+	4. The client will need to input the IP address into the editable text box under the JOIN button
+	5. When the IP is correctly input, just press JOIN and you should be joined.
+
+	The Client can Press JOIN before the server hosts too.
+
+	YOU CAN ONLY PRESS THESE BUTTONS ONCE, so if you do not successfully connect then you need to restart the OgreApp
+
+Controls for multiplayer:
+
+	The server (paddle) has all the same controls as before 
+	The client (goal) has control over the goal with the mouse.
+
+	Both can control the camera and go into orbit mode by pressing "C".
+
+	The Arrow keys can also be used to slightly shift the camera in the respective direction.
+
+	The game ends when the server runs out of lives.

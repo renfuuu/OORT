@@ -1,0 +1,9 @@
+How to build game:
+	In terminal, in the game directory, run "./buildit", without quotations
+	This will create an executable called OgreApp that you can run.
+
+How to run game:
+	(You can run the executable that's already there, or build again).
+	Run the executable from the file system or
+	Run the command from terminal "./OgreApp".
+
