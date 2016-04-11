@@ -1,6 +1,6 @@
 # CS 354R - Oort
 
-## Milestone 3.1
+## Milestone 4.1
 
 ### Project Description
 
@@ -59,6 +59,7 @@ We'll gut the previous projects code down to it's base and incorporate the ideas
 #### Contributor
 * Itoro Esiere
 * Kaleb Alanis
+* David Crawley
 
 #### Engines/Libraries
 * Ogre3D
