@@ -1,0 +1,448 @@
+
+material _missing_material_
+{
+    receive_shadows off
+    technique
+    {
+        pass
+        {
+            ambient 0.1 0.1 0.1 1.0
+            diffuse 0.8 0.0 0.0 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.3 0.3 0.3 1.0
+        }
+    }
+}
+
+// White genrated by blender2ogre 0.6.0
+
+material White 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass White
+        {
+            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Gray genrated by blender2ogre 0.6.0
+
+material Gray 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Gray
+        {
+            ambient 0.4207110106945038 0.4207110106945038 0.4207110106945038 1.0
+            diffuse 0.3365688135708691 0.3365688135708691 0.3365688135708691 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Glass genrated by blender2ogre 0.6.0
+
+material Glass 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Glass
+        {
+            ambient 0.800000011920929 0.800000011920929 0.800000011920929 0.5
+            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 0.5
+            specular 0.5 0.5 0.5 0.5 12.5
+            emissive 0.0 0.0 0.0 0.5
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// White.001 genrated by blender2ogre 0.6.0
+
+material White.001 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass White.001
+        {
+            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Yellow genrated by blender2ogre 0.6.0
+
+material Yellow 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Yellow
+        {
+            ambient 0.800000011920929 0.7678359746932983 0.10688100010156631 1.0
+            diffuse 0.6400000190734865 0.6142687889079568 0.08550480135537386 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Brown genrated by blender2ogre 0.6.0
+
+material Brown 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Brown
+        {
+            ambient 0.04244700074195862 0.02031799964606762 0.0 1.0
+            diffuse 0.033957601099574575 0.016254399959063526 0.0 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Red genrated by blender2ogre 0.6.0
+
+material Red 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Red
+        {
+            ambient 0.800000011920929 0.10751400142908096 0.1452600061893463 1.0
+            diffuse 0.6400000190734865 0.08601120242493154 0.11620800668311126 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Gray_Light genrated by blender2ogre 0.6.0
+
+material Gray_Light 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Gray_Light
+        {
+            ambient 0.40891098976135254 0.40891098976135254 0.40891098976135254 1.0
+            diffuse 0.3271287966836809 0.3271287966836809 0.3271287966836809 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Blue_Darker genrated by blender2ogre 0.6.0
+
+material Blue_Darker 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Blue_Darker
+        {
+            ambient 0.17746399343013763 0.29973599314689636 0.800000011920929 1.0
+            diffuse 0.14197119685964577 0.23978879809064857 0.6400000190734865 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Black genrated by blender2ogre 0.6.0
+
+material Black 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Black
+        {
+            ambient 0.021980000659823418 0.021980000659823418 0.021980000659823418 1.0
+            diffuse 0.01758400078988076 0.01758400078988076 0.01758400078988076 1.0
+            specular 0.018181830644607544 0.018181830644607544 0.018181830644607544 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Green genrated by blender2ogre 0.6.0
+
+material Green 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Green
+        {
+            ambient 0.4346197247505188 0.6429517269134521 0.39675578474998474 1.0
+            diffuse 0.3476957849814859 0.5143613891953436 0.3174046325296853 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Blue_Lighter genrated by blender2ogre 0.6.0
+
+material Blue_Lighter 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Blue_Lighter
+        {
+            ambient 0.3017340302467346 0.49336451292037964 0.6109041571617126 1.0
+            diffuse 0.24138722779433763 0.394691616217667 0.4887233330119152 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            mesh_exporter <bpy_struct, MaterialProperties("")>
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}

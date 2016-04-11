@@ -1,0 +1,7 @@
+Final Project Report:
+
+Details and explains the places where we did better or worse than we expected and why those cases arose:
+The look and feel of the game was an impressive part of this game. We turned our vision into a reality. It is pretty fun and our AI is challenging. UDP is known for being unreliable but it has not hindered us. 
+
+Unexpected Issues:
+When going from multiplayer to Single player to multiplayer our networking crashed, but the next day and after it didn't happen. Unexpected behavior that may never occur.
