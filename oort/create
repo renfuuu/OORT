@@ -4,4 +4,4 @@ mkdir build
 cp -avr Linux-Build-Tools/. build/
 cd build
 ./buildit
-./assignment2
+./oort

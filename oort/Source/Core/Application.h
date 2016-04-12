@@ -54,34 +54,34 @@ public:
 	Ogre::RenderWindow * mRenderWindow;
 	Ogre::SceneManager * mSceneManager;
 	Ogre::Camera * mCamera;
-	Ogre::Camera * ballCam;
+	Ogre::Camera * spaceshipCam;
 	Ogre::Camera * camMan;
 	OgreBites::SdkCameraMan * cameraMan;
 	Ogre::Timer* t1;
 
-	NetManager* netManager = nullptr;
+	// NetManager* netManager = nullptr;
 
-	StadiumFlashes* stadiumFlashes;
+	// StadiumFlashes* stadiumFlashes;
 
 	GameManager* gameManager;
 	OISManager* _oisManager;
 	Simulator* _simulator;
-	GameObject* _theBall;
-	GameObject* _thePaddle;
-	GameObject* _otherPaddle;
+	// GameObject* _theBall;
+	// GameObject* _thePaddle;
+	// GameObject* _otherPaddle;
 
-    CEGUI::OgreRenderer* mRenderer;
+    // CEGUI::OgreRenderer* mRenderer;
 
-    CEGUI::Window* hostServerButton;
-    CEGUI::Window* joinServerButton;
-    CEGUI::Window* ipBox;
-    CEGUI::Window* ipText;
-    CEGUI::Window* ipWindow;
-    CEGUI::Window* singlePlayerButton;
-    CEGUI::Window* homeButton;
-    CEGUI::Window* replayButton;
-    CEGUI::Window* howToButton;
-    CEGUI::Window* howToText;
+    // CEGUI::Window* hostServerButton;
+    // CEGUI::Window* joinServerButton;
+    // CEGUI::Window* ipBox;
+    // CEGUI::Window* ipText;
+    // CEGUI::Window* ipWindow;
+    // CEGUI::Window* singlePlayerButton;
+    // CEGUI::Window* homeButton;
+    // CEGUI::Window* replayButton;
+    // CEGUI::Window* howToButton;
+    // CEGUI::Window* howToText;
 	
 	std::vector<Ogre::Camera*> cameras;
 	std::list<GameState> states;
@@ -100,37 +100,37 @@ public:
 	void createChildEntity(std::string name, std::string mesh, Ogre::SceneNode* sceneNode, int x, int y, int z);
 	bool update(const Ogre::FrameEvent &evt);
 	bool handleGUI(const Ogre::FrameEvent &evt);
-	void handleAi();
-	bool updateServer(const Ogre::FrameEvent &evt);
-	bool updateClient(const Ogre::FrameEvent &evt);
+	// void handleAi();
+	// bool updateServer(const Ogre::FrameEvent &evt);
+	// bool updateClient(const Ogre::FrameEvent &evt);
 
-	Ball* createBall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-	Paddle* createPaddle(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-	Wall* createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-	void startStadiumFlashes(void);
+	// Ball* createBall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
+	// Paddle* createPaddle(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
+	// Wall* createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
+	// void startStadiumFlashes(void);
 	void setupWindowRendererSystem(void);
 	void setupResources(void);
 	void setupOIS(void);
-	void setupCEGUI(void);
+	// void setupCEGUI(void);
 	void setupCameras(void);
-	void setupGM(void);
+	// void setupGM(void);
 	void setupLighting(void);
 	void createObjects(void);
-	bool StartServer(const CEGUI::EventArgs &e);
-	bool JoinServer(const CEGUI::EventArgs &e);
+	// bool StartServer(const CEGUI::EventArgs &e);
+	// bool JoinServer(const CEGUI::EventArgs &e);
 	bool Quit(const CEGUI::EventArgs &e);
 	bool StartSinglePlayer(const CEGUI::EventArgs &e);
 	bool Replay(const CEGUI::EventArgs &e);
 	bool Home(const CEGUI::EventArgs &e);
 	bool HowTo(const CEGUI::EventArgs &e);
 
-	bool setupNetwork(bool);
+	// bool setupNetwork(bool);
 	bool error();
-	std::unordered_map<std::string, char*> dataParser(char*);
-	void hideGui();
-	void showGui();
-	void showEndGui();
-	void resetNetManager();
+	// std::unordered_map<std::string, char*> dataParser(char*);
+	// void hideGui();
+	// void showGui();
+	// void showEndGui();
+	// void resetNetManager();
 	void setState(State state);
-	void replayData();
+	// void replayData();
 };

@@ -9,7 +9,7 @@
 
 /* Project variables */
 
-#define PROJECT_NAME "${PROJECT_NAME}"
+#define PROJECT_NAME "Oort"
 
 /* Any other variables defined in your CMakeLists.txt before configure_file 
  * can be used here.
