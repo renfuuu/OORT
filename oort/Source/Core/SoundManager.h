@@ -12,7 +12,7 @@
 
 class SoundManager {
 public:
-	enum { WALL_BOUNCE, PADDLE_BOUNCE, GAME_WIN, GAME_LOSS, SCORE, NUM_SOUNDS } sounds;
+	enum { WALL_BOUNCE, PADDLE_BOUNCE, GAME_WIN, GAME_LOSS, HEADSHOT, NUM_SOUNDS } sounds;
 
 	SoundManager(void);
 	~SoundManager(void);

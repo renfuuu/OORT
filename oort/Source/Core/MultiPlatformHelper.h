@@ -4,7 +4,6 @@
 #include <iostream>
 #ifdef __linux__
 #include <unistd.h>
-#include <cstring>
 #endif
 #ifdef _WIN32
 #include <windows.h>
@@ -30,15 +29,6 @@ namespace MultiPlatformHelper {
 		#endif
 		#ifdef _WIN32
 				Sleep(sleepMs);
-		#endif
-	}
-
-	inline char* strtok(char *str, const char *delim, char **saveptr) {
-		#ifdef __linux__
-			return strtok_r(str, delim, saveptr);
-		#endif
-		#ifdef _WIN32
-			return strtok_s(str, delim, saveptr);
 		#endif
 	}
 }

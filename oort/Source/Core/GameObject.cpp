@@ -4,16 +4,16 @@
 #include <OgreWireBoundingBox.h>
 
 //Add the game object to the simulator
-GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin) :
-	name(nme), type(tp), sceneMgr(scnMgr), gameManager(ssm), rootNode(node), geom(ent), scale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
+GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin) :
+	name(nme), type(tp), sceneMgr(scnMgr), soundScoreManager(ssm), rootNode(node), geom(ent), scale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
 	needsUpdates(false), mass(mss), lastHitTime(0), previousHit(nullptr) {
 		inertia.setZero();
 		startPos = Ogre::Vector3(rootNode->getPosition());
 		particle = sceneMgr->createParticleSystem("Particle" + name, "BallTrail");
 }
 
-GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) :
-	name(nme), type(tp), sceneMgr(scnMgr), gameManager(ssm), rootNode(node), geom(ent), vscale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
+GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) :
+	name(nme), type(tp), sceneMgr(scnMgr), soundScoreManager(ssm), rootNode(node), geom(ent), vscale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
 	needsUpdates(false), mass(mss), lastHitTime(0), previousHit(nullptr) {
 		inertia.setZero();
 		startPos = Ogre::Vector3(rootNode->getPosition());
@@ -51,22 +51,6 @@ void GameObject::setPosition(float x, float y, float z) {
 	}
 }
 
-
-void GameObject::setVelocity(float x, float y, float z) {
-	body->setLinearVelocity(btVector3(x, y, z));
-	updateTransform();
-}
-
-void GameObject::setOrientation(Ogre::Quaternion qt) {
-	rootNode->setOrientation(qt);
-	updateTransform();
-}
-
-void GameObject::reflect() {
-	rootNode->yaw(Ogre::Degree(180), Ogre::Node::TransformSpace::TS_WORLD);
-	updateTransform();
-}
-
 void GameObject::setPosition(const Ogre::Vector3& pos) {
 	setPosition(pos.x, pos.y, pos.z);
 }
@@ -76,27 +60,15 @@ Ogre::SceneNode* GameObject::getNode() {
 }
 
 void GameObject::reset() {
-	reset(startPos);
-}
-
-void GameObject::reset(Ogre::Vector3 vec) {
-	setPosition(vec);
+	setPosition(startPos);
 	body->setLinearVelocity(btVector3(0,0,0));
-	body->setAngularVelocity(btVector3(0,0,0));
-	previousHit = nullptr;
 }
 
 void GameObject::applyForce(float x, float y, float z) {
 	body->applyCentralForce(btVector3(x, y, z));
-	updateTransform();
 }
 
-void GameObject::applyImpulse(const btVector3& impulse, const btVector3& rel_pos) {
-	body->applyImpulse(impulse, rel_pos);
-	updateTransform();
-}
-
-void GameObject::movePaddle(OISManager* _oisManager, int height, int width, float realX, float realY) {}
+void GameObject::moveSpaceship(OISManager* _oisManager, int height, int width) {}
 
 void GameObject::addToSimulator() {
 	// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
@@ -123,18 +95,12 @@ void GameObject::addToSimulator() {
 	simulator->addObject(this);
 }
 
-std::string GameObject::getPoints(){
-	//Overwritten in specific game objects.
-	return "NULL\n";
+int GameObject::getPoints(){
+	return 0;
 }
 
 Ogre::String GameObject::getName(){
 	return name;
-}
-
-std::string GameObject::getCoordinates() {
-	//Overwritten in specific game objects.
-	return "NULL\n";
 }
 
 GameObject::objectType GameObject::getType(){
@@ -147,11 +113,12 @@ void GameObject::setPoints(int points){
 
 void GameObject::resetScore() {
 	this->GameObject::reset();
-	gameManager->resetScore();
+	soundScoreManager->resetScore();
 }
 
 void GameObject::startScore() {
-	gameManager->postScore();
+	soundScoreManager->postScore();
+	soundScoreManager->postHighScore();
 }
 
 void GameObject::showColliderBox() {

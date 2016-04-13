@@ -6,7 +6,6 @@
 OISManager *OISManager::mOISManager;
  
 OISManager::OISManager( void ) :
-    cameraMan( 0 ),
     mMouse( 0 ),
     mKeyboard( 0 ),
     mInputSystem( 0 ) {
@@ -39,6 +38,10 @@ OISManager::~OISManager( void ) {
 void OISManager::initialise( Ogre::RenderWindow *renderWindow ) {
     if( !mInputSystem ) {
 
+        /*mInputSystem->destroyInputObject(mMouse);
+        mInputSystem->destroyInputObject(mKeyboard);
+        OIS::InputManager::destroyInputSystem(mInputSystem);
+*/
         // Setup basic variables
         OIS::ParamList paramList;    
         size_t windowHnd = 0;
@@ -51,17 +54,39 @@ void OISManager::initialise( Ogre::RenderWindow *renderWindow ) {
         windowHndStr << (unsigned int) windowHnd;
         paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
  
+    #if defined OIS_WIN32_PLATFORM
+        paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
+        paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
+        paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
+        paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
+    #elif defined OIS_LINUX_PLATFORM
+        paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
+        paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
+        paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
+        paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
+    #endif
+
         // Create inputsystem
         mInputSystem = OIS::InputManager::createInputSystem( paramList );
     
+
+
+        //mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject( OIS::OISMouse, true ));
+        
+        // If possible create a buffered keyboard
+        // (note: if below line doesn't compile, try:  if (mInputSystem->getNumberOfDevices(OIS::OISKeyboard) > 0) {
+        //if( mInputSystem->numKeyboards() > 0 ) {
         if (mInputSystem->getNumberOfDevices(OIS::OISKeyboard) > 0) {
             mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
             mKeyboard->setEventCallback( this );
         }
  
+        // If possible create a buffered mouse
+        // (note: if below line doesn't compile, try:  if (mInputSystem->getNumberOfDevices(OIS::OISMouse) > 0) {
+        //if( mInputSystem->numMice() > 0 ) {
         if (mInputSystem->getNumberOfDevices(OIS::OISMouse) > 0) {
             mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
-            mMouse->setEventCallback( this );   
+            mMouse->setEventCallback( this );
  
             // Get window size
             unsigned int width, height, depth;
@@ -71,13 +96,6 @@ void OISManager::initialise( Ogre::RenderWindow *renderWindow ) {
             // Set mouse region
             this->setWindowExtents( width, height );
         }
-
-    }
-}
-
-void OISManager::setupCameraMan(OgreBites::SdkCameraMan * camMan){
-    if(!cameraMan){
-        cameraMan = camMan;
     }
 }
  
@@ -194,12 +212,7 @@ OIS::Keyboard* OISManager::getKeyboard( void ) {
 
  
 bool OISManager::keyPressed( const OIS::KeyEvent &e ) {
-    if(cameraMan) cameraMan->injectKeyDown(e);
     mKeyPressed = e.key;
-
-    CEGUI::GUIContext& cxt = CEGUI::System::getSingleton().getDefaultGUIContext();
-    cxt.injectKeyDown((CEGUI::Key::Scan)e.key);
-    cxt.injectChar((CEGUI::Key::Scan)e.text);
 
     return true;
 }
@@ -211,36 +224,23 @@ OIS::KeyCode OISManager::lastKeyPressed() {
 }
 
 bool OISManager::keyReleased( const OIS::KeyEvent &e ) {
-    if(cameraMan) cameraMan->injectKeyUp(e);
     return true;
 }
  
 bool OISManager::mouseMoved( const OIS::MouseEvent &e ) {
 
-    if(cameraMan) cameraMan->injectMouseMove(e);
-
     // From -width/2 to +width/2
     mouseXAxis = (e.state.X.abs) - e.state.width/2;
     mouseYAxis = (e.state.Y.abs) - e.state.height/2;
-
-    CEGUI::System &sys = CEGUI::System::getSingleton();
-    sys.getDefaultGUIContext().injectMousePosition(e.state.X.abs, e.state.Y.abs);
-    // Scroll wheel.
-    if (e.state.Z.rel)
-        sys.getDefaultGUIContext().injectMouseWheelChange(e.state.Z.rel / 120.0f);
 
     return true;
 }
  
 bool OISManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
-    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonDown(convertButton(id));
-    if(cameraMan) cameraMan->injectMouseDown(e, id);
     return true;
 }
  
 bool OISManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
-    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonUp(convertButton(id));
-    if(cameraMan) cameraMan->injectMouseUp(e, id);
     return true;
 }
  
@@ -262,21 +262,4 @@ int OISManager::getMouseYAxis() {
 
 OIS::KeyCode OISManager::getKeyPressed(){
     return mKeyPressed;
-}
-
-CEGUI::MouseButton OISManager::convertButton(OIS::MouseButtonID buttonID) {
-    switch (buttonID)
-    {
-    case OIS::MB_Left:
-        return CEGUI::LeftButton;
- 
-    case OIS::MB_Right:
-        return CEGUI::RightButton;
- 
-    case OIS::MB_Middle:
-        return CEGUI::MiddleButton;
- 
-    default:
-        return CEGUI::LeftButton;
-    }
 }

@@ -1,11 +1,11 @@
-noinst_HEADERS = Application.h MultiPlatformHelper.h OISManager.h StadiumFlashes.h SceneHelper.h CoreConfig.h SoundManager.h ScoreManager.h GameManager.h GameObject.h Simulator.h BulletContactCallback.h CollisionContext.h OgreMotionState.h Ball.h Paddle.h Wall.h NetManager.h GameState.h
+noinst_HEADERS = Application.h MultiPlatformHelper.h OISManager.h SceneHelper.h CoreConfig.h SoundManager.h ScoreManager.h SoundScoreManager.h TextOverlay.h GameObject.h Simulator.h BulletContactCallback.h CollisionContext.h OgreMotionState.h Spaceship.h Wall.h
 
 bin_PROGRAMS = oort
 oort_CPPFLAGS = -I$(top_srcdir) -std=c++11 -Wunused-variable
-oort_SOURCES = Application.cpp main.cpp OISManager.cpp StadiumFlashes.cpp SoundManager.cpp ScoreManager.cpp GameManager.cpp Simulator.cpp GameObject.cpp OgreMotionState.cpp CollisionContext.cpp BulletContactCallback.cpp Ball.cpp Paddle.cpp Wall.cpp NetManager.cpp
-oort_CXXFLAGS = $(OGRE_CFLAGS) $(OIS_CFLAGS) $(bullet_CFLAGS) $(CEGUI_CFLAGS)
-oort_LDADD = $(OGRE_LIBS) $(OIS_LIBS) $(bullet_LIBS) $(CEGUI_LIBS) $(CEGUI_OGRE_LIBS)
-oort_LDFLAGS = -lOgreOverlay -lboost_system -lSDL -lSDL_mixer -lSDL_net
+oort_SOURCES = Application.cpp main.cpp OISManager.cpp SoundManager.cpp ScoreManager.cpp SoundScoreManager.cpp Simulator.cpp TextOverlay.cpp GameObject.cpp OgreMotionState.cpp CollisionContext.cpp BulletContactCallback.cpp Spaceship.cpp Wall.cpp
+oort_CXXFLAGS = $(OGRE_CFLAGS) $(OIS_CFLAGS) $(bullet_CFLAGS)
+oort_LDADD = $(OGRE_LIBS) $(OIS_LIBS) $(bullet_LIBS)
+oort_LDFLAGS = -lOgreOverlay -lboost_system -lSDL -lSDL_mixer
 
 EXTRA_DIST = buildit makeit
 AUTOMAKE_OPTIONS = foreign

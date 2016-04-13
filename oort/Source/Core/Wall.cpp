@@ -2,7 +2,7 @@
 #include "MultiPlatformHelper.h"
 #include "SceneHelper.h"
 
-Wall::Wall(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) : 
+Wall::Wall(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) : 
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	auto var = ent->getBoundingBox();
 	auto size = var.getSize();
@@ -15,22 +15,18 @@ Wall::~Wall(){
 
 void Wall::update() {
 
-	static int MAX_DT = 20;
+	static int MAX_DT = 4;
 
-	if (context->hit) {
+	// if (context->hit) {
+	// 	Ogre::Real dt = soundScoreManager->getTime() - lastHitTime;
+	// 	if ( dt > MAX_DT && context->getTheObject()->getType() == GameObject::BALL_OBJECT ) {
+	// 		lastHitTime = soundScoreManager->getTime();
+	// 		soundScoreManager->playSound(SoundScoreManager::WALL_BOUNCE);
+	// 	}
 
-		auto* obj = context->getTheObject();
-
-		Ogre::Real dt = gameManager->getTime() - lastHitTime;
-		if ( dt > MAX_DT && obj->getType() == GameObject::BALL_OBJECT ) {
-			gameManager->playSound(GameManager::WALL_BOUNCE);
-		}
-
-		if ( type != GameObject::FLOOR_OBJECT ) {
-		}
-		// The paddle can drag on the ground, don't let that reset our sound timer
-		if (obj->getType() != GameObject::PADDLE_OBJECT)
-			lastHitTime = gameManager->getTime();
-	}
+	// 	if ( type != GameObject::FLOOR_OBJECT ) {
+	// 		soundScoreManager->nonFloorHit();
+	// 	}
+	// }
 
 }

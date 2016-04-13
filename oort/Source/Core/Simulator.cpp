@@ -8,7 +8,7 @@ Simulator::Simulator() : objList(), collisionShapes() {
   overlappingPairCache = new btDbvtBroadphase(); 
   solver = new btSequentialImpulseConstraintSolver(); 
   dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration); 
-  dynamicsWorld->setGravity(btVector3(0.0, -3000.0f, 0.0));
+  dynamicsWorld->setGravity(btVector3(0.0, -1500.0f, 0.0));
   //Add collision shapes to reuse among rigid bodies
 }
 
@@ -25,12 +25,11 @@ void Simulator::stepSimulation(const Ogre::Real elapsedTime, int maxSubSteps, co
 	for (auto& outer : objList) {
 		// Clear the all previous hits
 		outer->cCallBack->ctxt.hit = false;
-		for (auto& inner : objList) {
-			if (outer == inner) continue;
-			// Compare if a contact is happening between these two gameobjects
-			dynamicsWorld->contactPairTest(outer->getBody(), inner->getBody(), *(outer->cCallBack));
-			outer->update();
-			outer->cCallBack->ctxt.hit = false;
-		}
+		// Compare if a contact is happening between these two gameobjects
+		dynamicsWorld->contactTest(outer->getBody(),*(outer->cCallBack));
+	}
+
+	for (auto& obj : objList) {
+		obj->update();
 	}
 }

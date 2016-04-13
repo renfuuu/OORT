@@ -59,7 +59,6 @@ We'll gut the previous projects code down to it's base and incorporate the ideas
 #### Contributor
 * Itoro Esiere
 * Kaleb Alanis
-* David Crawley
 
 #### Engines/Libraries
 * Ogre3D
