@@ -21,7 +21,7 @@
 #include "SoundScoreManager.h"
 #include "OISManager.h"
 #include "Simulator.h"
-#include "Ball.h"
+// #include "Ball.h"
 #include "Paddle.h"
 #include "Spaceship.h"
 #include "Wall.h"

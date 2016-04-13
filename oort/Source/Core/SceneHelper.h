@@ -1,7 +1,7 @@
 #pragma once
 #include <OgreSceneManager.h>
 #include <string>
-#include "Ball.h"
+// #include "Ball.h"
 #include "Paddle.h"
 #include "Application.h"
 
