@@ -37,6 +37,8 @@ void Application::init()
 
 		setupOIS();
 
+		setupCEGUI();
+
 		setupCameras();
 
 		Ogre::OverlaySystem* pOverlaySystem = new Ogre::OverlaySystem();
@@ -72,10 +74,10 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 	{
 		return false;
 	}
-		try {
-			_oisManager->capture();
-			_theSpaceship->moveSpaceship(_oisManager, height, width);
-
+	
+	try {
+		_theSpaceship->moveSpaceship(_oisManager, height, width);
+		_oisManager->capture();
 		// close window when ESC is pressed
 		if(_oisManager->getKeyPressed() == OIS::KC_ESCAPE)
 			mRunning = false;
@@ -86,21 +88,21 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 	// Code per frame in fixed FPS
 	float temp = t1->getMilliseconds();
 	if ((temp - dTime) >= (1.0 / fps)*1000.0) {
-		if( _soundScoreManager->isGameOver() ) {
+		if( _gameManager->isGameOver() ) {
 			gameOverTime += (temp - dTime);
 		}
 		update(evt);
 		dTime = temp;
 	}
 
-	if ( !(_soundScoreManager->isGameOver()) ) {
+	if ( !(_gameManager->isGameOver()) ) {
 		_simulator->stepSimulation(evt.timeSinceLastFrame, 1, 1.0 / fps);
 	}
 	else {
-		// _soundScoreManager->showGameOver();
+		// _gameManager->showGameOver();
 		// if(gameOverTime > 2000) {
-		// 	_soundScoreManager->resetGameOver();
-		// 	_soundScoreManager->hideGameOver();
+		// 	_gameManager->resetGameOver();
+		// 	_gameManager->hideGameOver();
 		// 	gameOverTime = 0.0f;
 		// }
 	}
@@ -127,7 +129,7 @@ void Application::update(const FrameEvent &evt) {
 
 	}
 	else if (lastKey == OIS::KC_M) {
-		_soundScoreManager->mute();
+		_gameManager->mute();
 	}
 	else if (lastKey == OIS::KC_1 || lastKey == OIS::KC_2 || lastKey == OIS::KC_3) {
 		int index = lastKey - 2;
@@ -162,7 +164,7 @@ void Application::createChildEntity(std::string name, std::string mesh, Ogre::Sc
 	ogreNode->setPosition(x, y, z);
 }
 
-Spaceship* Application::createSpaceship(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+Spaceship* Application::createSpaceship(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
 	createRootEntity(nme, meshName, x, y, z);
 	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
 	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
@@ -177,7 +179,7 @@ Spaceship* Application::createSpaceship(Ogre::String nme, GameObject::objectType
 	return obj;
 }
 
-Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
 	createRootEntity(nme, meshName, x, y, z);
 	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
 	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
@@ -289,11 +291,110 @@ void Application::setupOIS(void) {
 
 }
 
+void Application::setupCEGUI(void) {
+
+	mRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*mRenderWindow);
+	CEGUI::ImageManager::setImagesetDefaultResourceGroup("Imagesets");
+	CEGUI::Font::setDefaultResourceGroup("Fonts");
+	CEGUI::Scheme::setDefaultResourceGroup("Schemes");
+	CEGUI::WidgetLookManager::setDefaultResourceGroup("LookNFeel");
+	CEGUI::WindowManager::setDefaultResourceGroup("Layouts");
+
+	CEGUI::SchemeManager::getSingleton().createFromFile("AlfiskoSkin.scheme");
+	CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("AlfiskoSkin/MouseArrow");
+
+	CEGUI::FontManager &fmg = CEGUI::FontManager::getSingleton();
+	CEGUI::Font &font = fmg.createFreeTypeFont("arial", 20, true, "arial.ttf");
+	
+	CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
+	CEGUI::Window *sheet = wmgr.createWindow("DefaultWindow", "_MasterRoot");
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(sheet);
+
+	// CEGUI::Window* quitButton = wmgr.createWindow("AlfiskoSkin/Button", "QuitButton");
+	// quitButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.0f, 0), CEGUI::UDim(0.0f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.05f, 0))));
+	// quitButton->setText("Quit");
+
+	// ipWindow = wmgr.createWindow("AlfiskoSkin/Label", "ipWindow");
+	// ipWindow->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.92f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(1, 0))));
+	// ipWindow->setText(netManager->getIPstring());
+
+	// singlePlayerButton = wmgr.createWindow("AlfiskoSkin/Button", "SinglePlayerButton");
+	// singlePlayerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.35f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.4f, 0))));
+	// singlePlayerButton->setText("Single Player");
+
+	// hostServerButton = wmgr.createWindow("AlfiskoSkin/Button", "HostButton");
+	// hostServerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.45f, 0))));
+	// hostServerButton->setText("Host Game");
+
+	// ipText = wmgr.createWindow("AlfiskoSkin/Label", "Ip Label");
+	// ipText->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.525f, 0), CEGUI::UDim(0.45f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.725f, 0), CEGUI::UDim(0.5f, 0))));
+	// ipText->setText("IP Address");
+
+	// ipBox = wmgr.createWindow("AlfiskoSkin/Editbox", "Ip Box");
+	// ipBox->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.45f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.5f, 0))));
+
+	// joinServerButton = wmgr.createWindow("AlfiskoSkin/Button", "JoinButton");
+	// joinServerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.5f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.55f, 0))));
+	// joinServerButton->setText("Join Game");
+
+	// howToButton = wmgr.createWindow("AlfiskoSkin/Button", "HowToButton");
+	// howToButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.3f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.35f, 0))));
+	// howToButton->setText("How To Play");
+
+	// howToText = wmgr.createWindow("AlfiskoSkin/MultiLineEditbox", "Instructions");
+	// howToText->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.125f, 0), CEGUI::UDim(0.35f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.875f, 0), CEGUI::UDim(0.75f, 0))));
+	// howToText->setText(instructions);
+	// static_cast<CEGUI::MultiLineEditbox*>(howToText)->setReadOnly(true);
+
+	// homeButton = wmgr.createWindow("AlfiskoSkin/Button", "HomeButton");
+	// homeButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.0f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(0.05f, 0))));
+	// homeButton->setText("Home");
+
+	// replayButton = wmgr.createWindow("AlfiskoSkin/Button", "ReplayButton");
+	// replayButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
+	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.45f, 0))));
+	// replayButton->setText("Watch Replay");
+
+	// sheet->addChild(singlePlayerButton);
+	// sheet->addChild(hostServerButton);
+	// sheet->addChild(joinServerButton);
+	// sheet->addChild(quitButton);
+	// sheet->addChild(ipBox);
+	// sheet->addChild(ipText);
+	// sheet->addChild(ipWindow);
+	// sheet->addChild(homeButton);
+	// sheet->addChild(replayButton);
+	// sheet->addChild(howToButton);
+	// sheet->addChild(howToText);
+
+	// replayButton->hide();
+	// howToText->hide();
+
+	// singlePlayerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartSinglePlayer, this));
+	// hostServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartServer, this));
+	// joinServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::JoinServer, this));
+	// quitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Quit, this));
+	// homeButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Home, this));
+	// replayButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Replay, this));
+	// howToButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::HowTo, this));
+
+}
+
 void Application::setupCameras(void) {
 
 	mCamera = mSceneManager->createCamera("Main Camera");
 	Ogre::Camera* cam2 = mSceneManager->createCamera("Cam2");
-	spaceshipCam = mSceneManager->createCamera("Ball Cam");
+	spaceshipCam = mSceneManager->createCamera("Spaceship Cam");
 	// camMan = mSceneManager->createCamera("Camera Man");
 
 	// Add viewport and cameras
@@ -331,8 +432,8 @@ void Application::setupGameManager(void) {
 	WindowEventUtilities::addWindowEventListener(mRenderWindow, this);
 	mRenderWindow->addListener(this);
 
-	_soundScoreManager = new SoundScoreManager();
-	_soundScoreManager->startMusic();
+	_gameManager = new GameManager();
+	_gameManager->startMusic();
 
 }
 
@@ -363,19 +464,19 @@ void Application::setupLighting(void) {
 
 void Application::createObjects(void) {
 	
-	mSceneManager->setSkyDome(true, "Examples/CloudySky", 5, 8);
+	mSceneManager->setSkyDome(true, "Examples/SpaceSkyPlane", 5, 8);
 
 	// This paddle gets a negative Z coordinate that becomes positive in the function on movepaddle
-	_theSpaceship = createSpaceship("spaceship", GameObject::objectType::SPACESHIP_OBJECT, "Plane.mesh", 0, 0, -825, 100, mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+	_theSpaceship = createSpaceship("spaceship", GameObject::objectType::SPACESHIP_OBJECT, "Plane.mesh", 0, 0, 600, 20, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 	// _otherPaddle = createPaddle("other_paddle", GameObject::objectType::PADDLE_OBJECT, "paddle-blue.mesh", 0, 0, 825, 100, mSceneManager, gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
-	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 800, .35, mSceneManager, _soundScoreManager, 1.0f, 1.0f, 0.8f, false, _simulator);
+	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 800, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, _simulator);
 
-	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "floor.mesh", 0, -100, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 500, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 0.5f, 0.8f, false, _simulator);
-	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 0.8f, 0.8f, false, _simulator);
-	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _soundScoreManager, 0.0f, 0.9f, 0.8f, false, _simulator);
+	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "floor.mesh", 0, -100, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	// createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 500, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
+	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, _simulator);
+	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	// createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, _simulator);
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
 	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);
@@ -387,18 +488,31 @@ void Application::createObjects(void) {
 	// mSceneManager->setSkyDome(true, "Examples/CloudySky", 5, 8);
 
 	// // Test Bullet
-	// _theSpaceship = createPaddle("paddle", GameObject::objectType::PADDLE_OBJECT, "paddle.mesh", 0, 0, 0, 100, mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, true, mySim);
+	// _theSpaceship = createPaddle("paddle", GameObject::objectType::PADDLE_OBJECT, "paddle.mesh", 0, 0, 0, 100, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, mySim);
 
-	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 0, .35, mSceneManager, _soundScoreManager, 1.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "floor.mesh", 0, -100, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 600, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 0.5f, 0.8f, false, mySim);
-	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1350, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _soundScoreManager, 0.0f, 0.8f, 0.8f, false, mySim);
-	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("ceiling?", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _soundScoreManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("frontwall?", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 500, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _soundScoreManager, 0.0f, 0.9f, 0.8f, false, mySim);
+	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 0, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, mySim);
+	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "floor.mesh", 0, -100, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
+	// createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 600, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, mySim);
+	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1350, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, mySim);
+	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
+	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
+	// createWall("ceiling?", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
+	// createWall("frontwall?", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 500, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, mySim);
 
 
 	// _theBall->startScore();
 
 }
+
+/* 
+*CEGUI Button Callbacks 
+*/
+
+// bool Application::StartSinglePlayer(const CEGUI::EventArgs &e) {
+
+// 	begin = true;
+// 	setState(SINGLE);
+
+// 	gameManager->setServer(true);
+// 	return true;
+// }

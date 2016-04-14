@@ -7,6 +7,9 @@
 
 #include <OgreRenderWindow.h>
 
+#include <CEGUI/CEGUI.h>
+#include <CEGUI/RendererModules/Ogre/Renderer.h>
+
 class OISManager : public OIS::KeyListener, public OIS::MouseListener {
 public:
     virtual ~OISManager( void );
@@ -50,6 +53,8 @@ private:
     bool mouseMoved( const OIS::MouseEvent &e );
     bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
     bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
+
+    CEGUI::MouseButton convertButton(OIS::MouseButtonID);
 
     bool killWindow(bool running);
  

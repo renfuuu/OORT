@@ -6,7 +6,7 @@
 #include "CollisionContext.h"
 #include "OgreMotionState.h"
 #include "OISManager.h"
-#include "SoundScoreManager.h"
+#include "GameManager.h"
 
 #include <OgreCamera.h>
 #include <OgreEntity.h>
@@ -43,7 +43,7 @@ protected:
 	btTransform tr;
 	btVector3 inertia;
 
-	SoundScoreManager* soundScoreManager;
+	GameManager* gameManager;
 	
 	GameObject* previousHit;
 	Ogre::Real lastHitTime;
@@ -63,8 +63,8 @@ protected:
 public:
 	BulletContactCallback* cCallBack;
 
-	GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin);
-	GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin);
+	GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin);
+	GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin);
 	inline btRigidBody* getBody() { return body; }
 	void addToSimulator();
 	virtual void updateTransform();

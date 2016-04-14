@@ -2,7 +2,11 @@
 
 #include <OgreRoot.h>
 
-#include "TextOverlay.h"
+#include <CEGUI/CEGUI.h>
+#include <CEGUI/FontManager.h>
+#include <CEGUI/RendererModules/Ogre/Renderer.h>
+
+// #include "TextOverlay.h"
 #include "MultiPlatformHelper.h"
 
 class ScoreManager {
@@ -11,6 +15,7 @@ public:
 	~ScoreManager(void);
 
  	Ogre::Real getTime();
+ 	void addRenderer(CEGUI::OgreRenderer*);
  	void postScore(void);
  	void postHighScore(void);
  	void scorePoints(int);
@@ -35,15 +40,22 @@ protected:
  	int highScore;
  	int floorHitCount;
  	bool gameOverB;
- 	Ogre::OverlayContainer* overlayContainer;
- 	TextOverlay* scoreOverlay;
- 	TextOverlay* highScoreOverlay;
- 	TextOverlay* gameOverOverlay;
+
+ 	// Ogre::OverlayContainer* overlayContainer;
+ 	// TextOverlay* scoreOverlay;
+ 	// TextOverlay* highScoreOverlay;
+ 	// TextOverlay* gameOverOverlay;
 	std::string scoreText;
 	Ogre::String scoreLabel;
 	std::string highScoreText;
 	Ogre::String highScoreLabel;
-	Ogre::String gameOverText;
-	Ogre::String gameOverLabel;
+	// Ogre::String gameOverText;
+	// Ogre::String gameOverLabel;
 	std::fstream highScoreFile;
+
+	CEGUI::OgreRenderer* mRenderer;
+	CEGUI::Window* gameScoreboard;
+    CEGUI::Window* opponentScoreboard;
+    CEGUI::Window* youWinBoard;
+    CEGUI::Window* youLoseBoard;
 };

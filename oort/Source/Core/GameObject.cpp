@@ -4,16 +4,16 @@
 #include <OgreWireBoundingBox.h>
 
 //Add the game object to the simulator
-GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin) :
-	name(nme), type(tp), sceneMgr(scnMgr), soundScoreManager(ssm), rootNode(node), geom(ent), scale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
+GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin) :
+	name(nme), type(tp), sceneMgr(scnMgr), gameManager(ssm), rootNode(node), geom(ent), scale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
 	needsUpdates(false), mass(mss), lastHitTime(0), previousHit(nullptr) {
 		inertia.setZero();
 		startPos = Ogre::Vector3(rootNode->getPosition());
 		particle = sceneMgr->createParticleSystem("Particle" + name, "BallTrail");
 }
 
-GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) :
-	name(nme), type(tp), sceneMgr(scnMgr), soundScoreManager(ssm), rootNode(node), geom(ent), vscale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
+GameObject::GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) :
+	name(nme), type(tp), sceneMgr(scnMgr), gameManager(ssm), rootNode(node), geom(ent), vscale(scal), motionState(ms), simulator(sim), tr(), inertia(), restitution(rest), friction(frict), kinematic(kin),
 	needsUpdates(false), mass(mss), lastHitTime(0), previousHit(nullptr) {
 		inertia.setZero();
 		startPos = Ogre::Vector3(rootNode->getPosition());
@@ -113,12 +113,12 @@ void GameObject::setPoints(int points){
 
 void GameObject::resetScore() {
 	this->GameObject::reset();
-	soundScoreManager->resetScore();
+	gameManager->resetScore();
 }
 
 void GameObject::startScore() {
-	soundScoreManager->postScore();
-	soundScoreManager->postHighScore();
+	gameManager->postScore();
+	gameManager->postHighScore();
 }
 
 void GameObject::showColliderBox() {

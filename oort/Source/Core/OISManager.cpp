@@ -214,6 +214,10 @@ OIS::Keyboard* OISManager::getKeyboard( void ) {
 bool OISManager::keyPressed( const OIS::KeyEvent &e ) {
     mKeyPressed = e.key;
 
+    CEGUI::GUIContext& cxt = CEGUI::System::getSingleton().getDefaultGUIContext();
+    cxt.injectKeyDown((CEGUI::Key::Scan)e.key);
+    cxt.injectChar((CEGUI::Key::Scan)e.text); 
+
     return true;
 }
 
@@ -224,6 +228,13 @@ OIS::KeyCode OISManager::lastKeyPressed() {
 }
 
 bool OISManager::keyReleased( const OIS::KeyEvent &e ) {
+    // itKeyListener    = mKeyListeners.begin();
+    // itKeyListenerEnd = mKeyListeners.end();
+    // for(; itKeyListener != itKeyListenerEnd; ++itKeyListener ) {
+    //     if(!itKeyListener->second->keyReleased( e ))
+    //         break;
+    // }
+    
     return true;
 }
  
@@ -233,14 +244,23 @@ bool OISManager::mouseMoved( const OIS::MouseEvent &e ) {
     mouseXAxis = (e.state.X.abs) - e.state.width/2;
     mouseYAxis = (e.state.Y.abs) - e.state.height/2;
 
+    CEGUI::System &sys = CEGUI::System::getSingleton();
+    sys.getDefaultGUIContext().injectMousePosition(e.state.X.abs, e.state.Y.abs);
+    // Scroll wheel.
+    if (e.state.Z.rel)
+        sys.getDefaultGUIContext().injectMouseWheelChange(e.state.Z.rel / 120.0f);
+
+
     return true;
 }
  
 bool OISManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonDown(convertButton(id));
     return true;
 }
  
 bool OISManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonUp(convertButton(id));
     return true;
 }
  
@@ -262,4 +282,21 @@ int OISManager::getMouseYAxis() {
 
 OIS::KeyCode OISManager::getKeyPressed(){
     return mKeyPressed;
+}
+
+CEGUI::MouseButton OISManager::convertButton(OIS::MouseButtonID buttonID) {
+    switch (buttonID)
+    {
+    case OIS::MB_Left:
+        return CEGUI::LeftButton;
+ 
+    case OIS::MB_Right:
+        return CEGUI::RightButton;
+ 
+    case OIS::MB_Middle:
+        return CEGUI::MiddleButton;
+ 
+    default:
+        return CEGUI::LeftButton;
+    }
 }

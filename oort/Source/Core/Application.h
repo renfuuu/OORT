@@ -15,14 +15,18 @@
 #include <OISKeyboard.h>
 #include <OISInputManager.h>
 
-#include <unordered_map>
-#include <string>
+#include <CEGUI/CEGUI.h>
+#include <CEGUI/RendererModules/Ogre/Renderer.h>
 
-#include "SoundScoreManager.h"
+#include <unordered_map>
+#include <list>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+
+#include "GameManager.h"
 #include "OISManager.h"
 #include "Simulator.h"
-// #include "Ball.h"
-#include "Paddle.h"
 #include "Spaceship.h"
 #include "Wall.h"
 
@@ -43,11 +47,15 @@ public:
 	Ogre::Camera * spaceshipCam;
 	Ogre::Timer* t1;
 
-	SoundScoreManager* _soundScoreManager;
+	GameManager* _gameManager;
 	OISManager* _oisManager;
 	Simulator* _simulator;
 	GameObject* _theBall;
 	GameObject* _theSpaceship;
+
+    CEGUI::OgreRenderer* mRenderer;
+
+    //CEGUI Windows here
 	
 	std::vector<Ogre::Camera*> cameras;
 
@@ -63,14 +71,13 @@ public:
 	void createRootEntity(std::string name, std::string mesh, int x, int y, int z);
 	void createChildEntity(std::string name, std::string mesh, Ogre::SceneNode* sceneNode, int x, int y, int z);
 	void update(const Ogre::FrameEvent &evt);
-	// void movePaddle();
-	// Ball* createBall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-	Spaceship* createSpaceship(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-	Wall* createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, SoundScoreManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
+	Spaceship* createSpaceship(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
+	Wall* createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	
 	void setupWindowRendererSystem(void);
 	void setupResources(void);
 	void setupOIS(void);
+	void setupCEGUI(void);
 	void setupCameras(void);
 	void setupGameManager(void);
 	void setupLighting(void);

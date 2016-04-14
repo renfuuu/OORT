@@ -1,8 +1,6 @@
 #pragma once
 #include <OgreSceneManager.h>
 #include <string>
-// #include "Ball.h"
-#include "Paddle.h"
 #include "Application.h"
 
 namespace SceneHelper {
