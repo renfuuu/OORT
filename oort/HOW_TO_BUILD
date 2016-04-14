@@ -1,4 +1,4 @@
 cd build
 chmod u+x buildit makeit
 ./buildit
-./assignment2
+./oort
