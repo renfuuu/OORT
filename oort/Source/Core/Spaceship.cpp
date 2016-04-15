@@ -12,6 +12,10 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	auto size = var.getSize()/2;
 
 	shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
+
+	velocity = 1.0f;
+	acceleration = 0.0f;
+
 }
 
 Spaceship::~Spaceship() {
@@ -34,7 +38,14 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width) {
 
 	OIS::Keyboard* kb = _oisManager->getKeyboard();
 
-	if(kb && kb->isKeyDown(OIS::KC_W))
+
+	if(kb && kb->isKeyDown(OIS::KC_SPACE))
+	{	
+		Ogre::Vector3 look = mNode->getOrientation().zAxis();
+		velocity = velocity + velocity*acceleration;
+		mNode->translate(velocity*look);
+	}
+	else if(kb && kb->isKeyDown(OIS::KC_W))
 		mNode->pitch(Ogre::Degree(0.15));
 	else if (kb && kb->isKeyDown(OIS::KC_S))
 		mNode->pitch(Ogre::Degree(-0.15));
@@ -46,7 +57,10 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width) {
 		mNode->roll(Ogre::Degree(-0.15));
 	else if (kb && kb->isKeyDown(OIS::KC_E))
 		mNode->roll(Ogre::Degree(0.15));
-
+	else if (kb && kb->isKeyDown(OIS::KC_UP))
+		acceleration += .1;
+	else if (kb && kb->isKeyDown(OIS::KC_DOWN))
+		acceleration -= .1; 
 	// Standardize the positions into -1.0 to 1.0 for X and Y then scale them to 800x600. This works for all resolutions now.
 	// float t1 = ((float)width / 2.0f);
 	// float t2 = ((float)height / 2.0f);

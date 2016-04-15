@@ -74,7 +74,9 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 	{
 		return false;
 	}
-	
+	spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() - _theSpaceship->getNode()->getOrientation().zAxis());
+	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
+	mCamera = spaceshipCam;
 	try {
 		_theSpaceship->moveSpaceship(_oisManager, height, width);
 		_oisManager->capture();
