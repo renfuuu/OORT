@@ -74,9 +74,6 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 	{
 		return false;
 	}
-	spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() - _theSpaceship->getNode()->getOrientation().zAxis());
-	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
-	mCamera = spaceshipCam;
 	try {
 		_theSpaceship->moveSpaceship(_oisManager, height, width);
 		_oisManager->capture();
@@ -141,7 +138,8 @@ void Application::update(const FrameEvent &evt) {
 		}
 	}
 
-	// spaceshipCam->lookAt(_theBall->getNode()->getPosition());
+	// spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() + Ogre::Vector3(0,0,450));
+	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
 	// Small pull toward paddle to make it easier for the player to hit the ball
 	// int pull = 500;
@@ -171,6 +169,7 @@ Spaceship* Application::createSpaceship(Ogre::String nme, GameObject::objectType
 	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
 	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
 	sn->setScale(scale,scale,scale);
+	sn->yaw(Ogre::Degree(180));
 	// sn->showBoundingBox(true);
 	const btTransform pos;
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
@@ -394,33 +393,33 @@ void Application::setupCEGUI(void) {
 
 void Application::setupCameras(void) {
 
-	mCamera = mSceneManager->createCamera("Main Camera");
-	Ogre::Camera* cam2 = mSceneManager->createCamera("Cam2");
 	spaceshipCam = mSceneManager->createCamera("Spaceship Cam");
+	mCamera = mSceneManager->createCamera("Main Camera");
+	// Ogre::Camera* cam2 = mSceneManager->createCamera("Cam2");
 	// camMan = mSceneManager->createCamera("Camera Man");
 
 	// Add viewport and cameras
-	mRenderWindow->addViewport(mCamera);
+	mRenderWindow->addViewport(spaceshipCam);
+
+	spaceshipCam->setAutoAspectRatio(true);
+	spaceshipCam->setPosition(0, 120, 1800);
 
 	mCamera->setAutoAspectRatio(true);
 	mCamera->setPosition(0, 120, 1800);
 
-	cam2->setAutoAspectRatio(true);
-	cam2->setPosition(1350, 0, -400);
-	cam2->yaw(Ogre::Degree(90));
-	cam2->pitch(Ogre::Degree(15));
-
-	spaceshipCam->setAutoAspectRatio(true);
-	spaceshipCam->setPosition(0, 120, 1800);
+	// cam2->setAutoAspectRatio(true);
+	// cam2->setPosition(1350, 0, -400);
+	// cam2->yaw(Ogre::Degree(90));
+	// cam2->pitch(Ogre::Degree(15));
 
 	// camMan->setAutoAspectRatio(true);
 	// camMan->setPosition(0,120,400);
 	// camMan->lookAt(0,120,1800);
 
 	cameras = std::vector<Ogre::Camera*>();
-	cameras.push_back(mCamera);
-	cameras.push_back(cam2);
 	cameras.push_back(spaceshipCam);
+	cameras.push_back(mCamera);
+	// cameras.push_back(cam2);
 	// cameras.push_back(camMan);
 
 	// cameraMan = new OgreBites::SdkCameraMan(camMan);
