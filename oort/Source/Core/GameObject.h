@@ -82,7 +82,7 @@ public:
 	virtual void update() = 0;
 	virtual int getPoints();
 	virtual GameObject::objectType getType();
-	virtual void moveSpaceship(OISManager* _oisManager, int height, int width);
+	virtual void moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* camNode);
 	virtual Ogre::String getName(void);
 	virtual void setPoints(int points);
 };

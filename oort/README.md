@@ -32,6 +32,11 @@ A camera that follows the spaceship.
 
 #### Controls 
 
+C - Change cameras
+M - Mute music
+ESC - to quit game
+
+
 ##### Ship controls
 W & S control the pitch 
 A & D control the yaw 

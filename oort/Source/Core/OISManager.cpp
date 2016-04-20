@@ -6,6 +6,7 @@
 OISManager *OISManager::mOISManager;
  
 OISManager::OISManager( void ) :
+    cameraMan( 0 ),
     mMouse( 0 ),
     mKeyboard( 0 ),
     mInputSystem( 0 ) {
@@ -96,6 +97,12 @@ void OISManager::initialise( Ogre::RenderWindow *renderWindow ) {
             // Set mouse region
             this->setWindowExtents( width, height );
         }
+    }
+}
+
+void OISManager::setupCameraMan(OgreBites::SdkCameraMan * camMan){
+    if(!cameraMan){
+        cameraMan = camMan;
     }
 }
  
@@ -212,6 +219,7 @@ OIS::Keyboard* OISManager::getKeyboard( void ) {
 
  
 bool OISManager::keyPressed( const OIS::KeyEvent &e ) {
+    if(cameraMan) cameraMan->injectKeyDown(e);
     mKeyPressed = e.key;
 
     CEGUI::GUIContext& cxt = CEGUI::System::getSingleton().getDefaultGUIContext();
@@ -228,6 +236,8 @@ OIS::KeyCode OISManager::lastKeyPressed() {
 }
 
 bool OISManager::keyReleased( const OIS::KeyEvent &e ) {
+    if(cameraMan) cameraMan->injectKeyUp(e);
+
     // itKeyListener    = mKeyListeners.begin();
     // itKeyListenerEnd = mKeyListeners.end();
     // for(; itKeyListener != itKeyListenerEnd; ++itKeyListener ) {
@@ -239,6 +249,9 @@ bool OISManager::keyReleased( const OIS::KeyEvent &e ) {
 }
  
 bool OISManager::mouseMoved( const OIS::MouseEvent &e ) {
+
+    if(cameraMan) cameraMan->injectMouseMove(e);
+
 
     // From -width/2 to +width/2
     mouseXAxis = (e.state.X.abs) - e.state.width/2;
@@ -256,11 +269,13 @@ bool OISManager::mouseMoved( const OIS::MouseEvent &e ) {
  
 bool OISManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
     CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonDown(convertButton(id));
+    if(cameraMan) cameraMan->injectMouseDown(e, id);
     return true;
 }
  
 bool OISManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
     CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonUp(convertButton(id));
+    if(cameraMan) cameraMan->injectMouseUp(e, id);
     return true;
 }
  

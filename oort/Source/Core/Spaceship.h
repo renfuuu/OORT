@@ -11,6 +11,6 @@ public:
 	Spaceship(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin);
 	~Spaceship();
 	virtual void update();
-	virtual void moveSpaceship(OISManager* _oisManager, int height, int width);
+	virtual void moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* camNode);
 
 };

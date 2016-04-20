@@ -32,7 +32,7 @@ void Spaceship::update() {
 	}
 }
 
-void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width) {
+void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* camNode) {
 
 	Ogre::SceneNode* mNode = rootNode;
 
@@ -45,18 +45,36 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width) {
 		velocity = velocity + velocity*acceleration;
 		mNode->translate(velocity*look);
 	}
-	else if(kb && kb->isKeyDown(OIS::KC_W))
-		mNode->pitch(Ogre::Degree(0.15));
-	else if (kb && kb->isKeyDown(OIS::KC_S))
-		mNode->pitch(Ogre::Degree(-0.15));
-	else if (kb && kb->isKeyDown(OIS::KC_A))
-		mNode->yaw(Ogre::Degree(-0.15));
-	else if (kb && kb->isKeyDown(OIS::KC_D))
-		mNode->yaw(Ogre::Degree(0.15));
-	else if (kb && kb->isKeyDown(OIS::KC_Q))
-		mNode->roll(Ogre::Degree(-0.15));
-	else if (kb && kb->isKeyDown(OIS::KC_E))
-		mNode->roll(Ogre::Degree(0.15));
+	if(kb && kb->isKeyDown(OIS::KC_W))
+	{
+		mNode->pitch(Ogre::Degree(0.10));
+		camNode->pitch(Ogre::Degree(0.10));
+	}
+	if (kb && kb->isKeyDown(OIS::KC_S))
+	{
+		mNode->pitch(Ogre::Degree(-0.10));
+		camNode->pitch(Ogre::Degree(-0.10));
+	}
+	if (kb && kb->isKeyDown(OIS::KC_A))
+	{
+		mNode->yaw(Ogre::Degree(-0.10));
+		camNode->yaw(Ogre::Degree(-0.10));
+	}
+	if (kb && kb->isKeyDown(OIS::KC_D))
+	{
+		mNode->yaw(Ogre::Degree(0.10));
+		camNode->yaw(Ogre::Degree(0.10));
+	}
+	if (kb && kb->isKeyDown(OIS::KC_Q))
+	{
+		mNode->roll(Ogre::Degree(-0.10));
+		camNode->roll(Ogre::Degree(-0.10));
+	}
+	if (kb && kb->isKeyDown(OIS::KC_E))
+	{
+		mNode->roll(Ogre::Degree(0.10));
+		camNode->roll(Ogre::Degree(0.10));
+	}
 	else if (kb && kb->isKeyDown(OIS::KC_UP))
 		acceleration += .1;
 	else if (kb && kb->isKeyDown(OIS::KC_DOWN))

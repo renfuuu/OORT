@@ -68,7 +68,7 @@ void GameObject::applyForce(float x, float y, float z) {
 	body->applyCentralForce(btVector3(x, y, z));
 }
 
-void GameObject::moveSpaceship(OISManager* _oisManager, int height, int width) {}
+void GameObject::moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* camNode) {}
 
 void GameObject::addToSimulator() {
 	// using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects

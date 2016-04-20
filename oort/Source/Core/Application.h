@@ -15,6 +15,8 @@
 #include <OISKeyboard.h>
 #include <OISInputManager.h>
 
+#include <SdkCameraMan.h>
+
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/Ogre/Renderer.h>
 
@@ -45,6 +47,8 @@ public:
 	Ogre::SceneManager * mSceneManager;
 	Ogre::Camera * mCamera;
 	Ogre::Camera * spaceshipCam;
+	Ogre::Camera * camMan;
+	OgreBites::SdkCameraMan * cameraMan;
 	Ogre::Timer* t1;
 
 	GameManager* _gameManager;
@@ -52,6 +56,7 @@ public:
 	Simulator* _simulator;
 	GameObject* _theBall;
 	GameObject* _theSpaceship;
+	Ogre::SceneNode* _camNode;
 
     CEGUI::OgreRenderer* mRenderer;
 
@@ -62,6 +67,8 @@ public:
 	int points;
 	int width;
 	int height;
+
+	int camChange;
 
 	double fps = 300.0;
 
