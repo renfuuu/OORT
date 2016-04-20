@@ -61,41 +61,6 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width) {
 		acceleration += .1;
 	else if (kb && kb->isKeyDown(OIS::KC_DOWN))
 		acceleration -= .1; 
-	// Standardize the positions into -1.0 to 1.0 for X and Y then scale them to 800x600. This works for all resolutions now.
-	// float t1 = ((float)width / 2.0f);
-	// float t2 = ((float)height / 2.0f);
-	// float realX = (float)_oisManager->getMouseXAxis() / t1;
-	// float realY = (float)_oisManager->getMouseYAxis() / t2;
-
-	// int mouseX = Ogre::Math::Clamp((int)(realX*600), -300, 300);
-	// int mouseY = Ogre::Math::Clamp((int)(realY*300), -100, 200);
-	// int SpaceshipZ = (600/3)-(Ogre::Math::Sqr(mouseX)/(800*.75) + Ogre::Math::Sqr((800/600)*1.5*mouseY)/(600*.75));
-
-	// Ogre::SceneNode* mNode = rootNode;
-
-	// Ogre::Vector3 surfacePoint = Ogre::Vector3(mouseX, SpaceshipZ, mouseY);
-	// Ogre::Quaternion orient = mNode->getOrientation();
-	// Ogre::Vector3 normal = surfacePoint.normalisedCopy();
-	// Ogre::Vector3 normalCopy = -(surfacePoint + Ogre::Vector3(0,0,0)).normalisedCopy();
-	// Ogre::Vector3 ortho1 = (Ogre::Vector3(0, 1, 0).crossProduct(normalCopy)).normalisedCopy();
-	// Ogre::Vector3 ortho2 = (normalCopy.crossProduct(ortho1)).normalisedCopy();
-
-	// Ogre::Quaternion newOrientation(ortho1, ortho2, normalCopy);
-	// mNode->setOrientation(newOrientation);
-
-	// this->setPosition(surfacePoint + normal*50 - startPos);
 	
-	// Ogre::Vector3 u;
-	// if (mouseX < 0) 
-	// 	u = newOrientation.yAxis();
-	// else 
-	// 	u = -newOrientation.yAxis();
-	
-	// Ogre::Vector3 v = Ogre::Vector3(0, 0, 1);
-	// Ogre::Real cosine = u.dotProduct(v);
-
-	// Ogre::Real sin = u.crossProduct(v).length();
-	// mNode->roll(Ogre::Math::ATan2(sin, cosine));
-
 	updateTransform();
 }

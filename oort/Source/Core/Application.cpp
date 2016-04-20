@@ -138,7 +138,7 @@ void Application::update(const FrameEvent &evt) {
 		}
 	}
 
-	// spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() + Ogre::Vector3(0,0,450));
+	spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() + Ogre::Vector3(0,0,450));
 	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
 	// Small pull toward paddle to make it easier for the player to hit the ball
