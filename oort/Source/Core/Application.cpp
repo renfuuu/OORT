@@ -18,7 +18,8 @@
 using namespace Ogre;
 
 Application::Application():
-	camChange(0)
+	camChange(0),
+	laserCount(-1)
 {
 }
 
@@ -76,9 +77,6 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 		return false;
 	}
 	try {
-		if(cameras[camChange % cameras.size()]->getName() == "Spaceship Cam"){
-			_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
-		}
 		_oisManager->capture();
 		// close window when ESC is pressed
 		if(_oisManager->getKeyPressed() == OIS::KC_ESCAPE)
@@ -146,6 +144,16 @@ void Application::update(const FrameEvent &evt) {
 		}
 	}
 
+	if(cameras[camChange % cameras.size()]->getName() == "Spaceship Cam"){
+			_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
+	}
+
+	if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
+		laserCount ++;
+		// Ogre::String nme = "Laser " + laserCount;
+		// createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", 0, -100, 0, Ogre::Vector3(60, 120, 120), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	}
+
 	_camNode->setPosition(_theSpaceship->getNode()->getPosition());
 	// spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() + Ogre::Vector3(0,0,450));
 	// spaceshipCam->setOrientation(_theSpaceship->getNode()->getOrientation());
@@ -198,9 +206,9 @@ Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre:
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
 	sn->setScale(scale.x, scale.y, scale.z);
 
-	if(meshName != "floor.mesh") {
-		ent->setMaterialName("wall");
-	}
+	// if(meshName != "floor.mesh") {
+	ent->setMaterialName("wall");
+	// }
 
 	sn->pitch(pitch);
 	sn->yaw(yaw);
@@ -208,6 +216,24 @@ Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre:
 
 	Wall* obj = new Wall(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
 	obj->addToSimulator();
+
+	return obj;
+}
+
+Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+
+	createRootEntity(nme, meshName, x, y, z);
+	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
+	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
+	const btTransform pos;
+	OgreMotionState* ms = new OgreMotionState(pos, sn);
+	sn->setScale(scale.x, scale.y, scale.z);
+	ent->setMaterialName("Laser");
+
+	Laser* obj = new Laser(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
+	obj->addToSimulator();
+
+	lasers.push_back(obj);
 
 	return obj;
 }

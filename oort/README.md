@@ -43,7 +43,8 @@ A & D control the yaw
 Q & E control the roll 
 Arrow key up increases the throttle force
 Arrow key down decreases the throttle force
-Space to shoot the laser
+Space to move forward
+Left click to shoot laser 
 
 Debating on having multiple firing types that would be controlled with number keys 1-4
 

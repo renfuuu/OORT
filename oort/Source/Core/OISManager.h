@@ -83,5 +83,6 @@ private:
     int mouseXAxis;
     int mouseYAxis;
     OIS::KeyCode mKeyPressed;
+
 };
 #endif

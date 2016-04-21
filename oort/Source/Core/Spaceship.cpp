@@ -13,6 +13,10 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 
 	shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
 
+	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
+	// Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle");
+	// particleNode->attachObject(particle);
+
 	velocity = 1.0f;
 	acceleration = 0.0f;
 
