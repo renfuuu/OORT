@@ -150,6 +150,7 @@ void Application::update(const FrameEvent &evt) {
 
 	if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
 		laserCount ++;
+		std::cout << laserCount << std::endl;
 		// Ogre::String nme = "Laser " + laserCount;
 		// createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", 0, -100, 0, Ogre::Vector3(60, 120, 120), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	}

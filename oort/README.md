@@ -1,5 +1,35 @@
 # CS 354R - Oort
 
+## Milestone 4.2
+
+### Implemented
+* Most of the Spaceship controls
+* Space skybox
+* A cameraman for debugging
+
+### TODO
+* Arrow key up increases the throttle force
+* Arrow key down decreases the throttle force
+* Left click to shoot laser
+* Change music
+
+### ISSUES
+* 
+
+### How to play
+* Press C - change the cameras
+* Press M - mute music
+* Press ESC to quit the game
+* Press W & S control the pitch of the Spaceship
+* Press A & D control the yaw  of the Spaceship
+* Press Q & E control the roll of the Spaceship
+* Press Spacebar to move the Spaceship forward along it's current trajectory
+
+
+### Code and Outside resources used
+* Spaceship model downloaded from:http://www.blendswap.com/blends/view/75404 credit: DeNapes
+* Code from Itoro's Assignment 3 of CS354R
+
 ## Milestone 4.1
 
 ### Project Description
@@ -32,27 +62,19 @@ A camera that follows the spaceship.
 
 #### Controls 
 
-C - Change cameras
-M - Mute music
-ESC - to quit game
-
-
 ##### Ship controls
 W & S control the pitch 
 A & D control the yaw 
 Q & E control the roll 
 Arrow key up increases the throttle force
 Arrow key down decreases the throttle force
-Space to move forward
-Left click to shoot laser 
+Space to shoot the laser
 
 Debating on having multiple firing types that would be controlled with number keys 1-4
-
 
 #### Score Mechanic 
 
 Simple point system: You score points by destroying asteroids.
-
 
 #### Win/Lose Condition
 
