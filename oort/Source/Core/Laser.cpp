@@ -1,6 +1,8 @@
 #include "Laser.h"
 #include "MultiPlatformHelper.h"
 
+#define VELOCITY 30.0f
+
 Laser::Laser(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) : 
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	// Gets the radius of the Ogre::Entity sphere
@@ -11,11 +13,11 @@ Laser::~Laser() {
 }
 
 void Laser::updateTransform() {
-	// Ogre::Vector3 pos = rootNode->getPosition();
-	// tr.setOrigin(btVector3(pos.x, pos.y, pos.z));
+	Ogre::Vector3 pos = rootNode->getPosition();
+	tr.setOrigin(btVector3(pos.x, pos.y, pos.z));
 
-	// Ogre::Quaternion qt = rootNode->getOrientation();
-	// tr.setRotation(btQuaternion(qt.x, qt.y, qt.z, qt.w));
+	Ogre::Quaternion qt = rootNode->getOrientation();
+	tr.setRotation(btQuaternion(qt.x, qt.y, qt.z, qt.w));
 
 	motionState->updateTransform(tr);
 }
@@ -23,6 +25,7 @@ void Laser::updateTransform() {
 void Laser::update() {
 
 	if (context->hit) {
+
 
 		// startScore();
 		// if(previousHit != nullptr) {

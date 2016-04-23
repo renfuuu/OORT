@@ -127,8 +127,7 @@ void ScoreManager::resetScore(void) {
 }
 
 bool ScoreManager::isGameOver() {
-	// return gameOverB;
-	return true;
+	return gameOverB;
 }
 
 void ScoreManager::resetGameOver() {
@@ -148,7 +147,7 @@ void ScoreManager::hideGameOver() {
 
 
 void ScoreManager::gameOver() {
-	// gameOverB = true;
+	gameOverB = true;
 	// gameOverOverlay->setText(gameOverText);
 	// showGameOver();
 	// resetScore();

@@ -107,14 +107,17 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 		// }
 	}
 
-	// // Constrains the ball's speed
-	// static int maxSpeed = 4000;
-	// btVector3 velocity = _theBall->getBody()->getLinearVelocity();
- //    btScalar speed = velocity.length();
- //    if(speed > maxSpeed) {
- //        velocity *= maxSpeed/speed;
- //        _theBall->getBody()->setLinearVelocity(velocity);
- //    }
+	// Constrains the laser's speed
+	static int maxSpeed = 4000;
+	for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
+	{
+		btVector3 velocity = (*i)->getBody()->getLinearVelocity();
+	    btScalar speed = velocity.length();
+	    if(speed > maxSpeed) {
+	        velocity *= maxSpeed/speed;
+	        (*i)->getBody()->setLinearVelocity(velocity);
+	    }
+	}
 
 	cameraMan->frameRenderingQueued(evt);
 
@@ -125,12 +128,14 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 // Called once per predefined frame
 void Application::update(const FrameEvent &evt) {
 
+	static float dTime = t1->getMilliseconds();
+
 	OIS::KeyCode lastKey = _oisManager->lastKeyPressed();
 
-	if(lastKey == OIS::KC_SPACE) {
+		if(lastKey == OIS::KC_SPACE) {
 		// _theBall->resetScore();
-
 	}
+
 	else if (lastKey == OIS::KC_M) {
 		_gameManager->mute();
 	}
@@ -148,22 +153,29 @@ void Application::update(const FrameEvent &evt) {
 			_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
 	}
 
-	if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
-		laserCount ++;
-		std::cout << laserCount << std::endl;
-		// Ogre::String nme = "Laser " + laserCount;
-		// createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", 0, -100, 0, Ogre::Vector3(60, 120, 120), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	//Limit the time to shoot the lasers
+	float temp = t1->getMilliseconds();
+	float tts = 250.0;
+	if ((temp - dTime) >= tts) {
+		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left) && laserCount < 6){
+			laserCount ++;
+			// std::cout << laserCount << std::endl;
+			createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 120, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			dTime = temp;
+		}
 	}
 
+
 	_camNode->setPosition(_theSpaceship->getNode()->getPosition());
-	// spaceshipCam->setPosition(_theSpaceship->getNode()->getPosition() + Ogre::Vector3(0,0,450));
-	// spaceshipCam->setOrientation(_theSpaceship->getNode()->getOrientation());
 	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
 	// Small pull toward paddle to make it easier for the player to hit the ball
 	// int pull = 500;
 	// Ogre::Vector3 paddleAttract = (_theSpaceship->getNode()->getPosition() - _theBall->getNode()->getPosition()).normalisedCopy();
-	// _theBall->applyForce(paddleAttract.x * pull, paddleAttract.y * pull, paddleAttract.z * pull);
+	for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
+	{
+		(*i)->applyForce(0,0,500);
+	}
 }
 
 
@@ -221,14 +233,20 @@ Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre:
 	return obj;
 }
 
-Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, GameObject* sship, Ogre::Vector3 scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
 
-	createRootEntity(nme, meshName, x, y, z);
+	auto sspos = sship->getNode()->getPosition();
+	createRootEntity(nme, meshName, sspos.x, sspos.y, sspos.z);
 	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
 	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
 	const btTransform pos;
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
 	sn->setScale(scale.x, scale.y, scale.z);
+	// sn->roll(dynamic_cast<Spaceship*>(sship)->rollAngle);
+	// sn->yaw(dynamic_cast<Spaceship*>(sship)->yawAngle);
+	// sn->pitch(dynamic_cast<Spaceship*>(sship)->pitchAngle);
+	Ogre::Vector3 look = sship->getNode()->getOrientation().zAxis();
+	sn->translate(175.0f * look);
 	ent->setMaterialName("Laser");
 
 	Laser* obj = new Laser(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);

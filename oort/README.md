@@ -6,12 +6,15 @@
 * Most of the Spaceship controls
 * Space skybox
 * A cameraman for debugging
+* Spaceship object
+* Laser object
 
 ### TODO
 * Arrow key up increases the throttle force
 * Arrow key down decreases the throttle force
 * Left click to shoot laser
 * Change music
+* CEGUI
 
 ### ISSUES
 * 
