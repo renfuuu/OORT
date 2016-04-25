@@ -17,7 +17,11 @@
 * Add world boundaries with planes
 
 ### ISSUES
+We are on schedule and this was turned in on time.
 
+### DIVISION OF LABOR
+Itoro created the laser class and the camera toggle data structure and Kaleb implimented laser movement, camera movement and the spaceship throttle. 
+We both did a part of everything that's been implemented. We kept adding and modifying our logic to be cohesive with the style of game we are creating.
 
 ### How to play
 * Press C - change the cameras
@@ -26,6 +30,7 @@
 * Press W & S control the pitch of the Spaceship
 * Press A & D control the yaw  of the Spaceship
 * Press Q & E control the roll of the Spaceship
+* Press left mouse button to fire laser
 * Press Mouse Scroll to throttle up and down the Spaceship's trust to move it along it's current trajectory
 
 
