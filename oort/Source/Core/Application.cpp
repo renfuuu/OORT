@@ -160,21 +160,22 @@ void Application::update(const FrameEvent &evt) {
 		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left) && laserCount < 6){
 			laserCount ++;
 			// std::cout << laserCount << std::endl;
-			createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 120, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 			dTime = temp;
 		}
 	}
 
 
-	_camNode->setPosition(_theSpaceship->getNode()->getPosition());
-	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
+	// _camNode->setPosition(_theSpaceship->getNode()->getPosition());
+	// spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
 	// Small pull toward paddle to make it easier for the player to hit the ball
 	// int pull = 500;
 	// Ogre::Vector3 paddleAttract = (_theSpaceship->getNode()->getPosition() - _theBall->getNode()->getPosition()).normalisedCopy();
 	for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
 	{
-		(*i)->applyForce(0,0,500);
+		// (*i)->applyForce(0,0,500);
+		(*i)->moveLaser();
 	}
 }
 
@@ -251,7 +252,7 @@ Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogr
 
 	Laser* obj = new Laser(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
 	obj->addToSimulator();
-
+	obj->velocity = _theSpaceship->getNode()->getOrientation().zAxis();
 	lasers.push_back(obj);
 
 	return obj;
@@ -453,8 +454,8 @@ void Application::setupCameras(void) {
 	// Ogre::Camera* cam2 = mSceneManager->createCamera("Cam2");
 	camMan = mSceneManager->createCamera("Camera Man");
 
-	_camNode = mSceneManager->getRootSceneNode()->createChildSceneNode("Cam Node");
-	_camNode->attachObject(spaceshipCam);
+	// _camNode = mSceneManager->getRootSceneNode()->createChildSceneNode("Cam Node");
+	// _camNode->attachObject(spaceshipCam);
 
 	// Add viewport and cameras
 	mRenderWindow->addViewport(spaceshipCam);
@@ -530,12 +531,21 @@ void Application::createObjects(void) {
 	// _otherPaddle = createPaddle("other_paddle", GameObject::objectType::PADDLE_OBJECT, "paddle-blue.mesh", 0, 0, 825, 100, mSceneManager, gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 800, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, _simulator);
 
-	createWall("floor", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", 0, -100, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 500, 0, Ogre::Vector3(120, 240, 240), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
-	createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, _simulator);
-	createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 400), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 1200, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, _simulator);
+	//adding a forever orbit camera
+	_camNode = _theSpaceship->getNode()->createChildSceneNode("Cam Node");
+	_camNode->attachObject(spaceshipCam);
+	_camNode->translate(Ogre::Vector3(0,15,-75));
+	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
+
+
+
+	//creating walls
+	createWall("floor", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("ceiling", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, 20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
+	createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, _simulator);
+	createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", -20000, -20000, 20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, _simulator);
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
 	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);

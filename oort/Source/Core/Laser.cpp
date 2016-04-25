@@ -1,12 +1,16 @@
 #include "Laser.h"
 #include "MultiPlatformHelper.h"
 
-#define VELOCITY 30.0f
+#define SPEED 30.0f
 
 Laser::Laser(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) : 
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	// Gets the radius of the Ogre::Entity sphere
 	shape = new btSphereShape((ent->getBoundingBox().getHalfSize().x)*scale);
+	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
+	Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle_"+nme);
+	particleNode->attachObject(particle);
+
 }
 
 Laser::~Laser() {
@@ -20,6 +24,12 @@ void Laser::updateTransform() {
 	tr.setRotation(btQuaternion(qt.x, qt.y, qt.z, qt.w));
 
 	motionState->updateTransform(tr);
+}
+
+void Laser::moveLaser()
+{
+	Ogre::SceneNode* mNode = rootNode;
+	mNode->translate(SPEED * velocity);
 }
 
 void Laser::update() {

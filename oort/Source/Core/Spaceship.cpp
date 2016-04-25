@@ -5,6 +5,9 @@
 #define MIN_VELOCITY 0.1
 #define MAX_VELOCITY 35.0
 
+//TODO add max acceleration
+//TODO add min acceleration
+
 Spaceship::Spaceship(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin) : 
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	// Gets the radius of the Ogre::Entity sphere
@@ -20,8 +23,9 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	// Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle");
 	// particleNode->attachObject(particle);
 
+
 	velocity = 1.0f;
-	acceleration = 0.0f;
+	// acceleration = 0.0f;
 
 	pitchAngle = Ogre::Degree(0);
 	yawAngle = Ogre::Degree(0);
@@ -48,59 +52,75 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 	Ogre::SceneNode* mNode = rootNode;
 
 	OIS::Keyboard* kb = _oisManager->getKeyboard();
+	OIS::Mouse* mouse = _oisManager->getMouse();
 
+	float zVal = mouse->getMouseState().Z.rel;
+	float boost;
 
-	if(kb && kb->isKeyDown(OIS::KC_SPACE))
-	{	
-		if(velocity >= MIN_VELOCITY && velocity <= MAX_VELOCITY){
-			Ogre::Vector3 look = mNode->getOrientation().zAxis();
-			velocity = velocity + velocity*acceleration;
-			mNode->translate(velocity*look);
-		} 
-		else if(velocity > MAX_VELOCITY) velocity = MAX_VELOCITY;
-		else velocity = MIN_VELOCITY;
+	// std::cout << zVal << std::endl;
+	if(zVal!=0)
+	{
+		if(zVal>0)
+		{
+			velocity += 1.0;
+		}
+		else
+		{
+			velocity -= 1.0;
+		}
 	}
-	
+
+
+	if(velocity >= MIN_VELOCITY && velocity <= MAX_VELOCITY)
+	{
+		velocity = velocity + boost;
+	} 
+	else if(velocity > MAX_VELOCITY) 
+		velocity = MAX_VELOCITY;
+	else 
+		velocity = MIN_VELOCITY;
+		
+
 	if(kb && kb->isKeyDown(OIS::KC_W))
 	{
 		pitchAngle += Ogre::Degree(0.5);
 		mNode->pitch(Ogre::Degree(0.5));
-		camNode->pitch(Ogre::Degree(0.5));
+		// camNode->pitch(Ogre::Degree(0.5));
 	}
 	if (kb && kb->isKeyDown(OIS::KC_S))
 	{
 		pitchAngle += Ogre::Degree(-0.5);
 		mNode->pitch(Ogre::Degree(-0.5));
-		camNode->pitch(Ogre::Degree(-0.5));
+		// camNode->pitch(Ogre::Degree(-0.5));
 	}
 	if (kb && kb->isKeyDown(OIS::KC_A))
 	{
 		yawAngle += Ogre::Degree(-0.5);
 		mNode->yaw(Ogre::Degree(-0.5));
-		camNode->yaw(Ogre::Degree(-0.5));
+		// camNode->yaw(Ogre::Degree(-0.5));
 	}
 	if (kb && kb->isKeyDown(OIS::KC_D))
 	{
 		yawAngle += Ogre::Degree(0.5);
 		mNode->yaw(Ogre::Degree(0.5));
-		camNode->yaw(Ogre::Degree(0.5));
+		// camNode->yaw(Ogre::Degree(0.5));
 	}
 	if (kb && kb->isKeyDown(OIS::KC_Q))
 	{
 		rollAngle += Ogre::Degree(-0.5);
 		mNode->roll(Ogre::Degree(-0.5));
-		camNode->roll(Ogre::Degree(-0.5));
+		// camNode->roll(Ogre::Degree(-0.5));
 	}
 	if (kb && kb->isKeyDown(OIS::KC_E))
 	{
 		rollAngle += Ogre::Degree(0.5);
 		mNode->roll(Ogre::Degree(0.5));
-		camNode->roll(Ogre::Degree(0.5));
+		// camNode->roll(Ogre::Degree(0.5));
 	}
-	else if (kb && kb->isKeyDown(OIS::KC_UP))
-		acceleration += .0001;
-	else if (kb && kb->isKeyDown(OIS::KC_DOWN))
-		acceleration -= .0001; 
-	
+
+	Ogre::Vector3 look = mNode->getOrientation().zAxis();
+	mNode->translate(velocity*look);
+
 	updateTransform();
 }
+
