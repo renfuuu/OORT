@@ -3,21 +3,21 @@
 ## Milestone 4.2
 
 ### Implemented
-* Most of the Spaceship controls
-* Space skybox
-* A cameraman for debugging
-* Spaceship object
-* Laser object
+* Throttle based spaceship control system, uses scroll to manage throttle
+* A better follow camera for the space ship
+* Laser Instantiation, Firing and Movement
+* Added Particle physics to laser movement
 
 ### TODO
-* Arrow key up increases the throttle force
-* Arrow key down decreases the throttle force
-* Left click to shoot laser
 * Change music
-* CEGUI
+* CEGUI to inform player of ammo, minimap
+* Add asteroids
+* Mesh slicing, mesh manipulation
+* Integrate Assimp to load mesh in real time
+* Add world boundaries with planes
 
 ### ISSUES
-* 
+
 
 ### How to play
 * Press C - change the cameras
@@ -26,7 +26,7 @@
 * Press W & S control the pitch of the Spaceship
 * Press A & D control the yaw  of the Spaceship
 * Press Q & E control the roll of the Spaceship
-* Press Spacebar to move the Spaceship forward along it's current trajectory
+* Press Mouse Scroll to throttle up and down the Spaceship's trust to move it along it's current trajectory
 
 
 ### Code and Outside resources used
