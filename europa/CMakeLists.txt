@@ -20,12 +20,20 @@ elseif (UNIX)
   )
 endif()
 
+link_directories(
+  "deps/SOIL"
+  "deps/SOIL/lib"
+)
+
 include_directories(
   "/usr/local/include"
   "/opt/local/include"
   "/lusr/include"
   "${GLSL_SOURCE_DIR}"
   "/usr/include/SDL"
+  "deps/SOIL"
+  "deps/SOIL/src"
+  "deps/SOIL/build"
 )
 
 find_package(OpenGL REQUIRED)
@@ -44,9 +52,31 @@ include_directories(${GLFW_INCLUDE_DIRS})
 find_package(SDL REQUIRED)
 include_directories(${SDL_INCLUDE_DIR})
 link_libraries(${SDL_LIBRARY})
-find_package(SDL_IMAGE REQUIRED)
-include_directories(${SDL_IMAGE_INCLUDE_DIRS})
-link_libraries(${SDL_IMAGE_LIBRARIES})
+
+
+FIND_PATH( SOIL_INCLUDE_DIRS deps/SOIL deps/SOIL/build SOIL/SOIL.h /usr/include /usr/local/include deps/SOIL/src/SOIL.h $ENV{INCLUDE} )
+FIND_LIBRARY( SOIL_LIBRARIES NAMES SOIL PATHS /usr/lib /usr/local/lib deps/SOIL/lib)
+
+IF(SOIL_INCLUDE_DIRS)
+  MESSAGE(STATUS "Found SOIL include dir: ${SOIL_INCLUDE_DIRS}")
+ELSE(SOIL_INCLUDE_DIRS)
+  MESSAGE(STATUS "Could NOT find SOIL headers.")
+ENDIF(SOIL_INCLUDE_DIRS)
+
+IF(SOIL_LIBRARIES)
+  MESSAGE(STATUS "Found SOIL library: ${SOIL_LIBRARIES}")
+ELSE(SOIL_LIBRARIES)
+  MESSAGE(STATUS "Could NOT find SOIL library.")
+ENDIF(SOIL_LIBRARIES)
+
+IF(SOIL_INCLUDE_DIRS AND SOIL_LIBRARIES)
+  SET(SOIL_FOUND "YES")
+ELSE(SOIL_INCLUDE_DIRS AND SOIL_LIBRARIES)
+  SET(SOIL_FOUND "NO")
+  IF(SOIL_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Could not find SOIL. Please install SOIL")
+  ENDIF(SOIL_FIND_REQUIRED)
+ENDIF(SOIL_INCLUDE_DIRS AND SOIL_LIBRARIES)
 
 
 if (APPLE)
@@ -71,7 +101,6 @@ elseif (UNIX)
       "-lrt"
       "-lm"
       "-lSDL"
-      "-lSDL_image"
       "-lXinerama"
       "-lXcursor")
 endif()
@@ -81,4 +110,5 @@ target_link_libraries(assignment
                       ${GLFW_LIBRARIES}
                       ${GLEW_LIBRARY}
                       ${LDFLAGS}
+                      ${SOIL_LIBRARIES}
 )

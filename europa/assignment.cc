@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <map>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -15,241 +15,705 @@
 #include <GLFW/glfw3.h>
 
 #include <SDL.h> 
-#include <SDL_image.h>
+#include <SOIL.h>
 
-#define DEBUG 0
-
-
-
-int window_width = 800, window_height = 600;
-const std::string window_title = "OBJ Loader";
-
-// VBO and VAO descriptors.
-enum { 
-	kVertexBuffer, // Buffer of vertex positions
-	kIndexBuffer,  // Buffer of triangle indices
-	kNumVbos };
-
-GLuint vao = 0;                   // This will store the VAO descriptor.
-GLuint buffer_objects[kNumVbos];  // These will store VBO descriptors.
-
-const char* vertex_shader =
-    "#version 330 core\n"
-    "in vec3 vertex_position;" // A vector (x,y,z) representing the vertex's position
-    "uniform vec3 light_position;" // Global variable representing the light's position
-    "out vec3 vs_light_direction;" // Used for shading by the fragment shader
-    "void main() {"
-       "gl_Position = vec4(vertex_position, 1.0);" // Don't transform the vertices at all
-       "vs_light_direction = light_position - vertex_position;" // Calculate vector to the light (used for shading in fragment shader)
-    "}";
-
-const char* geometry_shader =
-    "#version 330 core\n"
-    "layout (triangles) in;" // Reads in triangles
-    "layout (triangle_strip, max_vertices = 3) out;" // And outputs triangles
-    "uniform mat4 view_projection;" // The matrix encoding the camera position and settings. Don't worry about this for now
-    "in vec3 vs_light_direction[];" // The light direction computed in the vertex shader
-    "out vec3 normal;" // The normal of the triangle. Needs to be computed inside this shader
-    "out vec3 light_direction;" // Light direction again (this is just passed straight through to the fragment shader)
-    "void main() {"
-    	//Took the cross product of (p2 - p1) and (p3 - p1) which returns a vector
-       "vec3 norm = cross( gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz, gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz);"
-       // normalized the resulting vector to obtain the unit vector
-       "normal = normalize(norm);"
-       "int n = 0;"
-       "for (n = 0; n < gl_in.length(); n++) {" // Loop over three vertices of the triangle
-          "light_direction = vs_light_direction[n];" // Pass the light direction to the fragment shader
-          "gl_Position = view_projection * gl_in[n].gl_Position;" // Project the vertex into screen coordinates
-          "EmitVertex();"
-       "}"
-       "EndPrimitive();"
-    "}";
-
-const char* fragment_shader =
-    "#version 330 core\n"
-    "in vec3 normal;" // Normal computed in the geometry shader
-    "in vec3 light_direction;" // Light direction computed in the vertex shader
-    "out vec4 fragment_color;" // This shader will compute the pixel color
-    "void main() {"
-       "vec4 color = vec4(1.0, 0.0, 0.0, 1.0);" // Red
-       "float dot_nl = dot(normalize(light_direction), normalize(normal));" // Compute brightness based on angle between normal and light
-       "dot_nl = clamp(dot_nl, 0.0, 1.0);" // Ignore back-facing triangles
-       "fragment_color = clamp(dot_nl * color, 0.0, 1.0);"
-    "}";
-//---------------------------------------------
-
-const char* sprite_vertex_shader =
-  "#version 330 core"
-  "layout (location = 0) in vec4 vertex;" // <vec2 position, vec2 texCoords>
-  "out vec2 TexCoords;"
-  "uniform mat4 model;"
-  "uniform mat4 projection;"
-  "void main()"
-  "{"
-  "    TexCoords = vertex.zw;"
-  "    gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);"
-  "}"
-
-const char* sprite_fragment_shader =
-  "#version 330 core"
-  "in vec2 TexCoords;"
-  "out vec4 color;"
-  "uniform sampler2D image;"
-  "uniform vec3 spriteColor;"
-  "void main()"
-  "{"
-  "    color = vec4(spriteColor, 1.0)*texture(image, TexCoords);"
-  "}"
-
-// Functions and macros to help debug GL errors
-
-const char* OpenGlErrorToString(GLenum error) {
-  switch (error) {
-    case GL_NO_ERROR:
-      return "GL_NO_ERROR";
-      break;
-    case GL_INVALID_ENUM:
-      return "GL_INVALID_ENUM";
-      break;
-    case GL_INVALID_VALUE:
-      return "GL_INVALID_VALUE";
-      break;
-    case GL_INVALID_OPERATION:
-      return "GL_INVALID_OPERATION";
-      break;
-    case GL_OUT_OF_MEMORY:
-      return "GL_OUT_OF_MEMORY";
-      break;
-    default:
-      return "Unknown Error";
-      break;
-  }
-  return "Unicorns Exist";
-}
-
-#define CHECK_SUCCESS(x) \
-  if (!(x)) {            \
-    glfwTerminate();     \
-    exit(EXIT_FAILURE);  \
-  }
-
-#define CHECK_GL_SHADER_ERROR(id)                                           \
-  {                                                                          \
-    GLint status = 0;                                                       \
-    GLint length = 0;                                                       \
-    glGetShaderiv(id, GL_COMPILE_STATUS, &status);                          \
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);                         \
-    if (!status) {                                                          \
-      std::string log(length, 0);                                           \
-      glGetShaderInfoLog(id, length, nullptr, &log[0]);                     \
-      std::cerr << "Line :" << __LINE__ << " OpenGL Shader Error: Log = \n" \
-                << &log[0];                                                 \
-      glfwTerminate();                                                      \
-      exit(EXIT_FAILURE);                                                   \
-    }                                                                       \
-  }
-
-#define CHECK_GL_PROGRAM_ERROR(id)                                           \
-  {                                                                          \
-    GLint status = 0;                                                        \
-    GLint length = 0;                                                        \
-    glGetProgramiv(id, GL_LINK_STATUS, &status);                             \
-    glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);                         \
-    if (!status) {                                                           \
-      std::string log(length, 0);                                            \
-      glGetProgramInfoLog(id, length, nullptr, &log[0]);                     \
-      std::cerr << "Line :" << __LINE__ << " OpenGL Program Error: Log = \n" \
-                << &log[0];                                                  \
-      glfwTerminate();                                                       \
-      exit(EXIT_FAILURE);                                                    \
-    }                                                                        \
-  }
-
-#define CHECK_GL_ERROR(statement)                                             \
-  {                                                                           \
-    { statement; }                                                            \
-    GLenum error = GL_NO_ERROR;                                               \
-    if ((error = glGetError()) != GL_NO_ERROR) {                              \
-      std::cerr << "Line :" << __LINE__ << " OpenGL Error: code  = " << error \
-                << " description =  " << OpenGlErrorToString(error);          \
-      glfwTerminate();                                                        \
-      exit(EXIT_FAILURE);                                                     \
-    }                                                                         \
-  }
+// #define DEBUG 0
 
 
-void LoadObj(const std::string& file, std::vector<glm::vec3>& vertices,
-             std::vector<glm::uvec3>& indices) 
-{
+
+// int window_width = 800, window_height = 600;
+// const std::string window_title = "OBJ Loader";
+
+// // VBO and VAO descriptors.
+// enum { 
+// 	kVertexBuffer, // Buffer of vertex positions
+// 	kIndexBuffer,  // Buffer of triangle indices
+// 	kNumVbos };
+
+// GLuint vao = 0;                   // This will store the VAO descriptor.
+// GLuint buffer_objects[kNumVbos];  // These will store VBO descriptors.
+
+// const char* vertex_shader =
+//     "#version 330 core\n"
+//     "in vec3 vertex_position;" // A vector (x,y,z) representing the vertex's position
+//     "uniform vec3 light_position;" // Global variable representing the light's position
+//     "out vec3 vs_light_direction;" // Used for shading by the fragment shader
+//     "void main() {"
+//        "gl_Position = vec4(vertex_position, 1.0);" // Don't transform the vertices at all
+//        "vs_light_direction = light_position - vertex_position;" // Calculate vector to the light (used for shading in fragment shader)
+//     "}";
+
+// const char* geometry_shader =
+//     "#version 330 core\n"
+//     "layout (triangles) in;" // Reads in triangles
+//     "layout (triangle_strip, max_vertices = 3) out;" // And outputs triangles
+//     "uniform mat4 view_projection;" // The matrix encoding the camera position and settings. Don't worry about this for now
+//     "in vec3 vs_light_direction[];" // The light direction computed in the vertex shader
+//     "out vec3 normal;" // The normal of the triangle. Needs to be computed inside this shader
+//     "out vec3 light_direction;" // Light direction again (this is just passed straight through to the fragment shader)
+//     "void main() {"
+//     	//Took the cross product of (p2 - p1) and (p3 - p1) which returns a vector
+//        "vec3 norm = cross( gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz, gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz);"
+//        // normalized the resulting vector to obtain the unit vector
+//        "normal = normalize(norm);"
+//        "int n = 0;"
+//        "for (n = 0; n < gl_in.length(); n++) {" // Loop over three vertices of the triangle
+//           "light_direction = vs_light_direction[n];" // Pass the light direction to the fragment shader
+//           "gl_Position = view_projection * gl_in[n].gl_Position;" // Project the vertex into screen coordinates
+//           "EmitVertex();"
+//        "}"
+//        "EndPrimitive();"
+//     "}";
+
+// const char* fragment_shader =
+//     "#version 330 core\n"
+//     "in vec3 normal;" // Normal computed in the geometry shader
+//     "in vec3 light_direction;" // Light direction computed in the vertex shader
+//     "out vec4 fragment_color;" // This shader will compute the pixel color
+//     "void main() {"
+//        "vec4 color = vec4(1.0, 0.0, 0.0, 1.0);" // Red
+//        "float dot_nl = dot(normalize(light_direction), normalize(normal));" // Compute brightness based on angle between normal and light
+//        "dot_nl = clamp(dot_nl, 0.0, 1.0);" // Ignore back-facing triangles
+//        "fragment_color = clamp(dot_nl * color, 0.0, 1.0);"
+//     "}";
+// //---------------------------------------------
+
+// const char* sprite_vertex_shader =
+//   "#version 330 core"
+//   "layout (location = 0) in vec4 vertex;" // <vec2 position, vec2 texCoords>
+//   "out vec2 TexCoords;"
+//   "uniform mat4 model;"
+//   "uniform mat4 projection;"
+//   "void main()"
+//   "{"
+//   "    TexCoords = vertex.zw;"
+//   "    gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);"
+//   "}";
+
+// const char* sprite_fragment_shader =
+//   "#version 330 core"
+//   "in vec2 TexCoords;"
+//   "out vec4 color;"
+//   "uniform sampler2D image;"
+//   "uniform vec3 spriteColor;"
+//   "void main()"
+//   "{"
+//   "    color = vec4(spriteColor, 1.0)*texture(image, TexCoords);"
+//   "}";
+
+// // Functions and macros to help debug GL errors
+
+// const char* OpenGlErrorToString(GLenum error) {
+//   switch (error) {
+//     case GL_NO_ERROR:
+//       return "GL_NO_ERROR";
+//       break;
+//     case GL_INVALID_ENUM:
+//       return "GL_INVALID_ENUM";
+//       break;
+//     case GL_INVALID_VALUE:
+//       return "GL_INVALID_VALUE";
+//       break;
+//     case GL_INVALID_OPERATION:
+//       return "GL_INVALID_OPERATION";
+//       break;
+//     case GL_OUT_OF_MEMORY:
+//       return "GL_OUT_OF_MEMORY";
+//       break;
+//     default:
+//       return "Unknown Error";
+//       break;
+//   }
+//   return "Unicorns Exist";
+// }
+
+// #define CHECK_SUCCESS(x) \
+//   if (!(x)) {            \
+//     glfwTerminate();     \
+//     exit(EXIT_FAILURE);  \
+//   }
+
+// #define CHECK_GL_SHADER_ERROR(id)                                           \
+//   {                                                                          \
+//     GLint status = 0;                                                       \
+//     GLint length = 0;                                                       \
+//     glGetShaderiv(id, GL_COMPILE_STATUS, &status);                          \
+//     glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);                         \
+//     if (!status) {                                                          \
+//       std::string log(length, 0);                                           \
+//       glGetShaderInfoLog(id, length, nullptr, &log[0]);                     \
+//       std::cerr << "Line :" << __LINE__ << " OpenGL Shader Error: Log = \n" \
+//                 << &log[0];                                                 \
+//       glfwTerminate();                                                      \
+//       exit(EXIT_FAILURE);                                                   \
+//     }                                                                       \
+//   }
+
+// #define CHECK_GL_PROGRAM_ERROR(id)                                           \
+//   {                                                                          \
+//     GLint status = 0;                                                        \
+//     GLint length = 0;                                                        \
+//     glGetProgramiv(id, GL_LINK_STATUS, &status);                             \
+//     glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);                         \
+//     if (!status) {                                                           \
+//       std::string log(length, 0);                                            \
+//       glGetProgramInfoLog(id, length, nullptr, &log[0]);                     \
+//       std::cerr << "Line :" << __LINE__ << " OpenGL Program Error: Log = \n" \
+//                 << &log[0];                                                  \
+//       glfwTerminate();                                                       \
+//       exit(EXIT_FAILURE);                                                    \
+//     }                                                                        \
+//   }
+
+// #define CHECK_GL_ERROR(statement)                                             \
+//   {                                                                           \
+//     { statement; }                                                            \
+//     GLenum error = GL_NO_ERROR;                                               \
+//     if ((error = glGetError()) != GL_NO_ERROR) {                              \
+//       std::cerr << "Line :" << __LINE__ << " OpenGL Error: code  = " << error \
+//                 << " description =  " << OpenGlErrorToString(error);          \
+//       glfwTerminate();                                                        \
+//       exit(EXIT_FAILURE);                                                     \
+//     }                                                                         \
+//   }
+
+
+// void LoadObj(const std::string& file, std::vector<glm::vec3>& vertices,
+//              std::vector<glm::uvec3>& indices) 
+// {
  
-  std::cout << "LOADOBJ INVOKED" << std::endl;
-  std::ifstream myfile (file);
-  std::string line;
-  //Open the obj file containing indicies and vertices
-  if(myfile.is_open())
-  {
-    while (getline(myfile, line))
-    {
-      // read the file
-      std::istringstream is (line);
-      char flag;
-      is >> flag;
-      switch(flag)
-      {
-      	//in the case that the line begins with v then add the point to the vertices vector
-        case 'v':
-        {
-          float v1,v2,v3;
-          is >> v1;
-          is >> v2;
-          is >> v3;
-          vertices.push_back(glm::vec3(v1,v2,v3));
-        }break;
-        case 'f':
-        {
-          //in the case that the line begins with f then add the 3 points to the indices vector
-          int v1,v2,v3;
-          is >> v1;
-          is >> v2;
-          is >> v3;
+//   std::cout << "LOADOBJ INVOKED" << std::endl;
+//   std::ifstream myfile (file);
+//   std::string line;
+//   //Open the obj file containing indicies and vertices
+//   if(myfile.is_open())
+//   {
+//     while (getline(myfile, line))
+//     {
+//       // read the file
+//       std::istringstream is (line);
+//       char flag;
+//       is >> flag;
+//       switch(flag)
+//       {
+//       	//in the case that the line begins with v then add the point to the vertices vector
+//         case 'v':
+//         {
+//           float v1,v2,v3;
+//           is >> v1;
+//           is >> v2;
+//           is >> v3;
+//           vertices.push_back(glm::vec3(v1,v2,v3));
+//         }break;
+//         case 'f':
+//         {
+//           //in the case that the line begins with f then add the 3 points to the indices vector
+//           int v1,v2,v3;
+//           is >> v1;
+//           is >> v2;
+//           is >> v3;
 
-          // Zero indexing because obj indices were 1 indexing
-          indices.push_back(glm::uvec3(v1-1,v2-1,v3-1));
+//           // Zero indexing because obj indices were 1 indexing
+//           indices.push_back(glm::uvec3(v1-1,v2-1,v3-1));
         
         
-        }break;
-        default:
-        break;
+//         }break;
+//         default:
+//         break;
+//       }
+//     }
+//     myfile.close();
+//   }
+//   else {
+//     std::cout << "Unable to open file" << std::endl;
+//   } 
+// }
+
+
+
+//----------------------------------------------------------------------------
+class Shader
+{
+public:
+    // State
+    GLuint ID; 
+    // Constructor
+    Shader()  {}
+    ~Shader() {}
+    // Sets the current shader as active
+    Shader &Use()
+    {
+      glUseProgram(this->ID);
+      return *this;
+    }
+    // Compiles the shader from given source code
+    void Compile(const GLchar *vertexSource, const GLchar *fragmentSource, const GLchar *geometrySource = nullptr) // Note: geometry source code is optional 
+    {
+      GLuint sVertex, sFragment, gShader;
+      // Vertex Shader
+      sVertex = glCreateShader(GL_VERTEX_SHADER);
+      glShaderSource(sVertex, 1, &vertexSource, NULL);
+      glCompileShader(sVertex);
+      checkCompileErrors(sVertex, "VERTEX");
+      // Fragment Shader
+      sFragment = glCreateShader(GL_FRAGMENT_SHADER);
+      glShaderSource(sFragment, 1, &fragmentSource, NULL);
+      glCompileShader(sFragment);
+      checkCompileErrors(sFragment, "FRAGMENT");
+      // If geometry shader source code is given, also compile geometry shader
+      if (geometrySource != nullptr)
+      {
+          gShader = glCreateShader(GL_GEOMETRY_SHADER);
+          glShaderSource(gShader, 1, &geometrySource, NULL);
+          glCompileShader(gShader);
+          checkCompileErrors(gShader, "GEOMETRY");
+      }
+      // Shader Program
+      this->ID = glCreateProgram();
+      glAttachShader(this->ID, sVertex);
+      glAttachShader(this->ID, sFragment);
+      if (geometrySource != nullptr)
+          glAttachShader(this->ID, gShader);
+      glLinkProgram(this->ID);
+      checkCompileErrors(this->ID, "PROGRAM");
+      // Delete the shaders as they're linked into our program now and no longer necessery
+      glDeleteShader(sVertex);
+      glDeleteShader(sFragment);
+      if (geometrySource != nullptr)
+          glDeleteShader(gShader);
+    }
+    // Utility functions
+    
+    void SetFloat (const GLchar *name, GLfloat value, GLboolean useShader = false)
+    {
+      if (useShader)
+        this->Use();
+      glUniform1f(glGetUniformLocation(this->ID, name), value);
+    }
+    void SetInteger  (const GLchar *name, GLint value, GLboolean useShader = false)
+    {
+      if (useShader)
+        this->Use();
+      glUniform1i(glGetUniformLocation(this->ID, name), value);
+    }
+
+    void SetVector2f (const GLchar *name, GLfloat x, GLfloat y, GLboolean useShader = false)
+    {
+      if (useShader)
+        this->Use();
+      glUniform2f(glGetUniformLocation(this->ID, name), x, y);
+    }
+
+    void SetVector2f (const GLchar *name, const glm::vec2 &value, GLboolean useShader = false)
+    {
+      if (useShader)
+        this->Use();
+      glUniform2f(glGetUniformLocation(this->ID, name), value.x, value.y);
+    }
+
+    void SetVector3f(const GLchar *name, GLfloat x, GLfloat y, GLfloat z, GLboolean useShader = false)
+    {
+        if (useShader)
+            this->Use();
+        glUniform3f(glGetUniformLocation(this->ID, name), x, y, z);
+    }
+
+    void SetVector3f(const GLchar *name, const glm::vec3 &value, GLboolean useShader = false)
+    {
+        if (useShader)
+            this->Use();
+        glUniform3f(glGetUniformLocation(this->ID, name), value.x, value.y, value.z);
+    }
+
+    void SetVector4f(const GLchar *name, GLfloat x, GLfloat y, GLfloat z, GLfloat w, GLboolean useShader = false)
+    {
+        if (useShader)
+            this->Use();
+        glUniform4f(glGetUniformLocation(this->ID, name), x, y, z, w);
+    }
+
+    void SetVector4f(const GLchar *name, const glm::vec4 &value, GLboolean useShader = false)
+    {
+        if (useShader)
+            this->Use();
+        glUniform4f(glGetUniformLocation(this->ID, name), value.x, value.y, value.z, value.w);
+    }
+
+    void SetMatrix4(const GLchar *name, const glm::mat4 &matrix, GLboolean useShader = false)
+    {
+        if (useShader)
+            this->Use();
+        glUniformMatrix4fv(glGetUniformLocation(this->ID, name), 1, GL_FALSE, &matrix[0][0]);
+    }
+
+private:
+    // Checks if compilation or linking failed and if so, print the error logs
+    void checkCompileErrors(GLuint object, std::string type)
+    {
+      GLint success;
+      GLchar infoLog[1024];
+      if (type != "PROGRAM")
+      {
+          glGetShaderiv(object, GL_COMPILE_STATUS, &success);
+          if (!success)
+          {
+              glGetShaderInfoLog(object, 1024, NULL, infoLog);
+              std::cout << "| ERROR::SHADER: Compile-time error: Type: " << type << "\n"
+                  << infoLog << "\n -- --------------------------------------------------- -- "
+                  << std::endl;
+          }
+      }
+      else
+      {
+          glGetProgramiv(object, GL_LINK_STATUS, &success);
+          if (!success)
+          {
+              glGetProgramInfoLog(object, 1024, NULL, infoLog);
+              std::cout << "| ERROR::Shader: Link-time error: Type: " << type << "\n"
+                  << infoLog << "\n -- --------------------------------------------------- -- "
+                  << std::endl;
+          }
       }
     }
-    myfile.close();
-  }
-  else {
-    std::cout << "Unable to open file" << std::endl;
-  } 
+};
+
+class Texture2D
+{
+public:
+    // Holds the ID of the texture object, used for all texture operations to reference to this particlar texture
+    GLuint ID;
+    // Texture image dimensions
+    GLuint Width, Height; // Width and height of loaded image in pixels
+    // Texture Format
+    GLuint Internal_Format; // Format of texture object
+    GLuint Image_Format; // Format of loaded image
+    // Texture configuration
+    GLuint Wrap_S; // Wrapping mode on S axis
+    GLuint Wrap_T; // Wrapping mode on T axis
+    GLuint Filter_Min; // Filtering mode if texture pixels < screen pixels
+    GLuint Filter_Max; // Filtering mode if texture pixels > screen pixels
+    // Constructor (sets default texture modes)
+    Texture2D()
+        : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
+    {
+        glGenTextures(1, &this->ID);
+    }    
+    // Generates texture from image data
+    void Generate(GLuint width, GLuint height, unsigned char* data)
+    {
+        this->Width = width;
+        this->Height = height;
+        // Create Texture
+        glBindTexture(GL_TEXTURE_2D, this->ID);
+        glTexImage2D(GL_TEXTURE_2D, 0, this->Internal_Format, width, height, 0, this->Image_Format, GL_UNSIGNED_BYTE, data);
+        // Set Texture wrap and filter modes
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->Wrap_S);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->Wrap_T);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->Filter_Min);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->Filter_Max);
+        // Unbind texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }    
+    // Binds the texture as the current active GL_TEXTURE_2D texture object
+
+    void Bind() const
+    {
+        glBindTexture(GL_TEXTURE_2D, this->ID);
+    }
+};
+
+class ResourceManager
+{
+public:
+    // Resource storage
+    static std::map<std::string, Shader>    Shaders;
+    static std::map<std::string, Texture2D> Textures;
+    // Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
+    static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name);
+    // Retrieves a stored sader
+    static Shader   GetShader(std::string name);
+    // Loads (and generates) a texture from file
+    static Texture2D LoadTexture(const GLchar *file, GLboolean alpha, std::string name);
+    // Retrieves a stored texture
+    static Texture2D GetTexture(std::string name);
+    // Properly de-allocates all loaded resources
+    static void      Clear();
+private:
+    // Private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available (static).
+    ResourceManager() { }
+    // Loads and generates a shader from file
+    static Shader    loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile = nullptr);
+    // Loads a single texture from file
+    static Texture2D loadTextureFromFile(const GLchar *file, GLboolean alpha);
+};
+
+
+std::map<std::string, Texture2D>    ResourceManager::Textures;
+std::map<std::string, Shader>       ResourceManager::Shaders;
+
+Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name)
+{
+    Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
+    return Shaders[name];
 }
 
-
-void ErrorCallback(int error, const char* description) {
-  std::cerr << "GLFW Error: " << description << "\n";
+Shader ResourceManager::GetShader(std::string name)
+{
+    return Shaders[name];
 }
 
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action,
-                 int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GL_TRUE);
+Texture2D ResourceManager::LoadTexture(const GLchar *file, GLboolean alpha, std::string name)
+{
+    Textures[name] = loadTextureFromFile(file, alpha);
+    return Textures[name];
+}
+
+Texture2D ResourceManager::GetTexture(std::string name)
+{
+    return Textures[name];
+}
+
+void ResourceManager::Clear()
+{
+    // (Properly) delete all shaders  
+    for (auto iter : Shaders)
+        glDeleteProgram(iter.second.ID);
+    // (Properly) delete all textures
+    for (auto iter : Textures)
+        glDeleteTextures(1, &iter.second.ID);
+}
+
+Shader ResourceManager::loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile)
+{
+    // 1. Retrieve the vertex/fragment source code from filePath
+    std::string vertexCode;
+    std::string fragmentCode;
+    std::string geometryCode;
+    try
+    {
+        // Open files
+        std::ifstream vertexShaderFile(vShaderFile);
+        std::ifstream fragmentShaderFile(fShaderFile);
+        std::stringstream vShaderStream, fShaderStream;
+        // Read file's buffer contents into streams
+        vShaderStream << vertexShaderFile.rdbuf();
+        fShaderStream << fragmentShaderFile.rdbuf();
+        // close file handlers
+        vertexShaderFile.close();
+        fragmentShaderFile.close();
+        // Convert stream into string
+        vertexCode = vShaderStream.str();
+        fragmentCode = fShaderStream.str();
+        // If geometry shader path is present, also load a geometry shader
+        if (gShaderFile != nullptr)
+        {
+            std::ifstream geometryShaderFile(gShaderFile);
+            std::stringstream gShaderStream;
+            gShaderStream << geometryShaderFile.rdbuf();
+            geometryShaderFile.close();
+            geometryCode = gShaderStream.str();
+        }
+    }
+    catch (std::exception e)
+    {
+        std::cout << "ERROR::SHADER: Failed to read shader files" << std::endl;
+    }
+    const GLchar *vShaderCode = vertexCode.c_str();
+    const GLchar *fShaderCode = fragmentCode.c_str();
+    const GLchar *gShaderCode = geometryCode.c_str();
+    // 2. Now create shader object from source code
+    Shader shader;
+    shader.Compile(vShaderCode, fShaderCode, gShaderFile != nullptr ? gShaderCode : nullptr);
+    std::cout << "SUCCESS::SHADER: Completed Shader Compilation" << std::endl;
+    return shader;
+}
+
+Texture2D ResourceManager::loadTextureFromFile(const GLchar *file, GLboolean alpha)
+{
+    // Create Texture object
+    Texture2D texture;
+    if (alpha)
+    {
+        texture.Internal_Format = GL_RGBA;
+        texture.Image_Format = GL_RGBA;
+    }
+    // Load image
+    int width, height;
+    unsigned char* image = SOIL_load_image(file, &width, &height, 0, texture.Image_Format == GL_RGBA ? SOIL_LOAD_RGBA : SOIL_LOAD_RGB);
+    // Now generate texture
+    std::cout << image << std::endl;
+    texture.Generate(width, height, image);
+    // And finally free image data
+    SOIL_free_image_data(image);
+    std::cout << "SUCCESS::Texture2D: Completed Texture Loading" << std::endl;
+    return texture;
 }
 
 class SpriteRenderer
 {
-public:
-  SpriteRenderer(Shader);
-  ~SpriteRenderer();
+    private:
+      Shader shader; 
+      GLuint quadVAO;
 
-  /* data */
+    public:
+      SpriteRenderer(Shader sh)
+      {
+        shader = sh;
+        this->initRenderData();
+      }
+
+      ~SpriteRenderer()
+      {}
+
+      void DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size = glm::vec2(10, 10), GLfloat rotate = 0.0f, glm::vec3 color = glm::vec3(1.0f))
+      {
+        // Prepare transformations
+        this->shader.Use();
+        glm::mat4 model;
+        model = glm::translate(model, glm::vec3(position, 0.0f));  
+
+        model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); 
+        model = glm::rotate(model, rotate, glm::vec3(0.0f, 0.0f, 1.0f)); 
+        model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+
+        model = glm::scale(model, glm::vec3(size, 1.0f)); 
+      
+        this->shader.SetMatrix4("model", model);
+        this->shader.SetVector3f("spriteColor", color);
+      
+        glActiveTexture(GL_TEXTURE0);
+        texture.Bind();
+
+        glBindVertexArray(this->quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+      }
+
+      void initRenderData()
+      {
+        // Configure VAO/VBO
+        GLuint VBO;
+        GLfloat vertices[] = { 
+            // Pos      // Tex
+            0.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 
+        
+            0.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 1.0f, 0.0f
+        };
+
+        glGenVertexArrays(1, &this->quadVAO);
+        glGenBuffers(1, &VBO);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glBindVertexArray(this->quadVAO);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);  
+        glBindVertexArray(0);
+      }
 };
 
 
+
+// GLFW function declerations
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+// The Width of the screen
+const GLuint SCREEN_WIDTH = 800;
+// The height of the screen
+const GLuint SCREEN_HEIGHT = 600;
+
+SpriteRenderer* Renderer;
+
+void init()
+{
+ // Load shaders
+  ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+  // Configure shaders
+  glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCREEN_WIDTH), 
+      static_cast<GLfloat>(SCREEN_HEIGHT), 0.0f, -1.0f, 1.0f);
+  ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+  ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+  // Set render-specific controls
+  Shader myShader;
+  myShader = ResourceManager::GetShader("sprite");
+  Renderer = new SpriteRenderer(myShader);  // Load textures
+  ResourceManager::LoadTexture("textures/awesomeface.png", GL_TRUE, "face");
+}
+
+void render()
+{
+  Renderer->DrawSprite(ResourceManager::GetTexture("face"), 
+        glm::vec2(200, 200), glm::vec2(300, 400), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+int main(int argc, char *argv[])
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2D Animation", nullptr, nullptr);
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE;
+    glewInit();
+    glGetError(); // Call it once to catch glewInit() bug, all other errors are now from our application.
+
+    glfwSetKeyCallback(window, key_callback);
+
+    // OpenGL configuration
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+    // DeltaTime variables
+    GLfloat deltaTime = 0.0f;
+    GLfloat lastFrame = 0.0f;
+
+    init();
+
+    while (!glfwWindowShouldClose(window))
+    {
+        // Calculate delta time
+        GLfloat currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        glfwPollEvents();
+
+
+
+        // Render
+        glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200, 200), glm::vec2(300, 400), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glfwSwapBuffers(window);
+    }
+
+    // Delete all resources as loaded using the resource manager
+    ResourceManager::Clear();
+
+    glfwTerminate();
+    return 0;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    // When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+/*
 
 int main(int argc, char* argv[]) {
   std::string file;
@@ -381,9 +845,6 @@ int main(int argc, char* argv[]) {
   std::cout << "max_bounds = " << glm::to_string(max_bounds) << "\n";
   std::cout << "center = " << glm::to_string(0.5f * (min_bounds + max_bounds))
             << "\n";
-  
-
-
 
   glm::vec3 light_position = glm::vec3(10.0f, 0.0f, 10.0f);
   glm::vec3 eye = glm::vec3(0.0f, 0.1f, 0.4f);
@@ -432,7 +893,20 @@ int main(int argc, char* argv[]) {
     glfwPollEvents();
     glfwSwapBuffers(window);
   }
+
   glfwDestroyWindow(window);
   glfwTerminate();
   exit(EXIT_SUCCESS);
 }
+
+void ErrorCallback(int error, const char* description) {
+  std::cerr << "GLFW Error: " << description << "\n";
+}
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action,
+                 int mods) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+*/
