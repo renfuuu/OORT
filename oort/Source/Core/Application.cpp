@@ -212,22 +212,47 @@ Spaceship* Application::createSpaceship(Ogre::String nme, GameObject::objectType
 	return obj;
 }
 
-Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Vector3 scale, Ogre::Degree pitch, Ogre::Degree yaw, Ogre::Degree roll, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
-	createRootEntity(nme, meshName, x, y, z);
-	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
-	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
+Wall* Application::createWall(Ogre::String nme, GameObject::objectType tp, std::string type, int width, int height, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+
+
+	//create a mesh blueprint
+    Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
+    //create mesh
+    if(type == "upDown"){
+	    Ogre::MeshManager::getSingleton().createPlane("upDown",
+	      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+	      plane, 
+	      width, height, 20, 20, 
+	      true, 
+	      1, 5, 5, 
+	      Ogre::Vector3::UNIT_Z);
+    }else{
+	    plane.normal = Ogre::Vector3::UNIT_Z;
+
+	    Ogre::MeshManager::getSingleton().createPlane("sides",
+	    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+	     plane,
+	     width, height,20,20,
+	     true,
+	     1,5,5,
+	     Ogre::Vector3::UNIT_Y);
+    }
+
+    Ogre::Entity* ent = mSceneManager->createEntity(type);
+	ent->setMaterialName("wall");
+	ent->setCastShadows(true);
+	Ogre::SceneNode* sn = mSceneManager->getRootSceneNode()->createChildSceneNode(nme);
+	sn->attachObject(ent);
+	sn->setPosition(position.x, position.y, position.z);
+
+	sn->pitch(Ogre::Degree(rotate.x));
+	sn->yaw(Ogre::Degree(rotate.y));
+	sn->roll(Ogre::Degree(rotate.z));
+
 	const btTransform pos;
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
-	sn->setScale(scale.x, scale.y, scale.z);
 
-	// if(meshName != "floor.mesh") {
-	ent->setMaterialName("wall");
-	// }
-
-	sn->pitch(pitch);
-	sn->yaw(yaw);
-	sn->roll(roll);
-
+	Ogre::Vector3 scale(0,0,0);
 	Wall* obj = new Wall(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
 	obj->addToSimulator();
 
@@ -527,7 +552,7 @@ void Application::createObjects(void) {
 	mSceneManager->setSkyDome(true, "Examples/SpaceSkyPlane", 5, 8);
 
 	// This paddle gets a negative Z coordinate that becomes positive in the function on movepaddle
-	_theSpaceship = createSpaceship("spaceship", GameObject::objectType::SPACESHIP_OBJECT, "Plane.mesh", 0, 0, 600, 50, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+	_theSpaceship = createSpaceship("spaceship", GameObject::objectType::SPACESHIP_OBJECT, "Plane.mesh", 0, 600, 600, 50, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 	// _otherPaddle = createPaddle("other_paddle", GameObject::objectType::PADDLE_OBJECT, "paddle-blue.mesh", 0, 0, 825, 100, mSceneManager, gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 800, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, _simulator);
 
@@ -537,15 +562,26 @@ void Application::createObjects(void) {
 	_camNode->translate(Ogre::Vector3(0,15,-75));
 	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
+ //    wallNode4->yaw(Ogre::Degree(270));
+	//(pitch, yaw, roll)
 
+ //    wallNode4->setPosition(750, 375, 0);
 
 	//creating walls
-	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("ceiling", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, 20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
+	createWall("floor", GameObject::objectType::FLOOR_OBJECT, "upDown", 15000, 15000, Ogre::Vector3(0,0,0), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("ceiling", GameObject::objectType::FLOOR_OBJECT, "upDown", 15000, 15000, Ogre::Vector3(0,15000,0), Ogre::Vector3(180,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("leftwall", GameObject::objectType::FLOOR_OBJECT, "sides", 15000, 15000, Ogre::Vector3(-7500,7500,0), Ogre::Vector3(0,90,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("frontwall", GameObject::objectType::FLOOR_OBJECT, "sides", 15000, 15000, Ogre::Vector3(0,7500,7500), Ogre::Vector3(0,180,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("backwall", GameObject::objectType::FLOOR_OBJECT, "sides", 15000, 15000, Ogre::Vector3(0,7500,-7500), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	createWall("rightwall", GameObject::objectType::FLOOR_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+
+
 	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, _simulator);
 	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	// createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", -20000, -20000, 20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, _simulator);
+	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	// createWall("ceiling", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, 20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
 	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);
