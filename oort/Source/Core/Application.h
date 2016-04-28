@@ -32,6 +32,7 @@
 #include "Spaceship.h"
 #include "Wall.h"
 #include "Laser.h"
+#include "Asteroid.h"
 
 class Application : public Ogre::FrameListener, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
 {
@@ -65,6 +66,7 @@ public:
 	
 	std::vector<Ogre::Camera*> cameras;
 	std::vector<Laser*> lasers;
+	std::vector<Asteroid*> asteroids;
 
 	int points;
 	int width;

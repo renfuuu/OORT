@@ -31,19 +31,36 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	yawAngle = Ogre::Degree(0);
 	rollAngle = Ogre::Degree(0);
 
+	hitWall = false;
+
 }
 
 Spaceship::~Spaceship() {
 }
 
 void Spaceship::update() {
-
 	static int MAX_DT = 5;
 
 	if (context->hit) {
 		Ogre::Real dt = gameManager->getTime() - lastHitTime;
 		if ( dt > MAX_DT )
 			lastHitTime = gameManager->getTime();
+
+
+		// startScore();
+		if(previousHit != nullptr) {
+			// Check for wall collision but not twice in a row
+			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit */) {
+				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
+				hitWall = true;
+			}
+			else if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
+
+			}
+
+		}
+		
+		previousHit = context->getTheObject();
 	}
 }
 
@@ -51,75 +68,92 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 	Ogre::SceneNode* mNode = rootNode;
 
-	OIS::Keyboard* kb = _oisManager->getKeyboard();
-	OIS::Mouse* mouse = _oisManager->getMouse();
+	if(hitWall){
 
-	float zVal = mouse->getMouseState().Z.rel;
-	float boost;
-
-	// std::cout << zVal << std::endl;
-	if(zVal!=0)
-	{
-		if(zVal>0)
-		{
-			velocity += 1.0;
-		}
-		else
-		{
-			velocity -= 1.0;
-		}
-	}
-
-
-	if(velocity >= MIN_VELOCITY && velocity <= MAX_VELOCITY)
-	{
-		velocity = velocity + boost;
-	} 
-	else if(velocity > MAX_VELOCITY) 
-		velocity = MAX_VELOCITY;
-	else 
-		velocity = MIN_VELOCITY;
-		
-
-	if(kb && kb->isKeyDown(OIS::KC_W))
-	{
-		pitchAngle += Ogre::Degree(0.5);
-		mNode->pitch(Ogre::Degree(0.5));
-		// camNode->pitch(Ogre::Degree(0.5));
-	}
-	if (kb && kb->isKeyDown(OIS::KC_S))
-	{
-		pitchAngle += Ogre::Degree(-0.5);
-		mNode->pitch(Ogre::Degree(-0.5));
-		// camNode->pitch(Ogre::Degree(-0.5));
-	}
-	if (kb && kb->isKeyDown(OIS::KC_A))
-	{
-		yawAngle += Ogre::Degree(-0.5);
-		mNode->yaw(Ogre::Degree(-0.5));
-		// camNode->yaw(Ogre::Degree(-0.5));
-	}
-	if (kb && kb->isKeyDown(OIS::KC_D))
-	{
-		yawAngle += Ogre::Degree(0.5);
 		mNode->yaw(Ogre::Degree(0.5));
-		// camNode->yaw(Ogre::Degree(0.5));
-	}
-	if (kb && kb->isKeyDown(OIS::KC_Q))
-	{
-		rollAngle += Ogre::Degree(-0.5);
-		mNode->roll(Ogre::Degree(-0.5));
-		// camNode->roll(Ogre::Degree(-0.5));
-	}
-	if (kb && kb->isKeyDown(OIS::KC_E))
-	{
-		rollAngle += Ogre::Degree(0.5);
-		mNode->roll(Ogre::Degree(0.5));
-		// camNode->roll(Ogre::Degree(0.5));
+		yawAngle += Ogre::Degree(0.5);
+
+		Ogre::Vector3 look = mNode->getOrientation().zAxis();
+		Ogre::Vector3 wallNormal = dynamic_cast<Wall*>(context->getTheObject())->normal;
+		Ogre::Real dotProduct = look.dotProduct(wallNormal);
+		
+		//if the look dotted with the wall's normal is negative then keep yawing
+		if(dotProduct > 0){
+			hitWall = false;
+			mNode->translate(velocity*look);
+		}
+	}else{
+		OIS::Keyboard* kb = _oisManager->getKeyboard();
+		OIS::Mouse* mouse = _oisManager->getMouse();
+
+		float zVal = mouse->getMouseState().Z.rel;
+		float boost;
+
+		// std::cout << zVal << std::endl;
+		if(zVal!=0)
+		{
+			if(zVal>0)
+			{
+				velocity += 1.0;
+			}
+			else
+			{
+				velocity -= 1.0;
+			}
+		}
+
+
+		if(velocity >= MIN_VELOCITY && velocity <= MAX_VELOCITY)
+		{
+			velocity = velocity + boost;
+		} 
+		else if(velocity > MAX_VELOCITY) 
+			velocity = MAX_VELOCITY;
+		else 
+			velocity = MIN_VELOCITY;
+			
+
+		if(kb && kb->isKeyDown(OIS::KC_W))
+		{
+			pitchAngle += Ogre::Degree(0.5);
+			mNode->pitch(Ogre::Degree(0.5));
+			// camNode->pitch(Ogre::Degree(0.5));
+		}
+		if (kb && kb->isKeyDown(OIS::KC_S))
+		{
+			pitchAngle += Ogre::Degree(-0.5);
+			mNode->pitch(Ogre::Degree(-0.5));
+			// camNode->pitch(Ogre::Degree(-0.5));
+		}
+		if (kb && kb->isKeyDown(OIS::KC_A))
+		{
+			yawAngle += Ogre::Degree(-0.5);
+			mNode->yaw(Ogre::Degree(-0.5));
+			// camNode->yaw(Ogre::Degree(-0.5));
+		}
+		if (kb && kb->isKeyDown(OIS::KC_D))
+		{
+			yawAngle += Ogre::Degree(0.5);
+			mNode->yaw(Ogre::Degree(0.5));
+			// camNode->yaw(Ogre::Degree(0.5));
+		}
+		if (kb && kb->isKeyDown(OIS::KC_Q))
+		{
+			rollAngle += Ogre::Degree(-0.5);
+			mNode->roll(Ogre::Degree(-0.5));
+			// camNode->roll(Ogre::Degree(-0.5));
+		}
+		if (kb && kb->isKeyDown(OIS::KC_E))
+		{
+			rollAngle += Ogre::Degree(0.5);
+			mNode->roll(Ogre::Degree(0.5));
+			// camNode->roll(Ogre::Degree(0.5));
+		}
+
+		Ogre::Vector3 look = mNode->getOrientation().zAxis();
+		mNode->translate(velocity*look);
 	}
 
-	Ogre::Vector3 look = mNode->getOrientation().zAxis();
-	mNode->translate(velocity*look);
 
 	updateTransform();
 }

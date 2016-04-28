@@ -18,6 +18,8 @@ public:
 	Ogre::Degree yawAngle;
 	Ogre::Degree rollAngle;
 
+	bool hitWall;
+
 	OgreBites::SdkCameraMan* getCamera();
 
 	virtual void update();
