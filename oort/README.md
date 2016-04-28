@@ -1,5 +1,12 @@
 # CS 354R - Oort
 
+## Milestone 4.3
+
+### Code and Outside resources used
+* Spaceship model downloaded from:http://www.blendswap.com/blends/view/75404 credit: DeNapes
+* Code from Itoro's Assignment 3 of CS354R
+* Asteroid model downloaded from:http://www.blendswap.com/blends/view/69608 credit: S2
+
 ## Milestone 4.2
 
 ### Implemented
