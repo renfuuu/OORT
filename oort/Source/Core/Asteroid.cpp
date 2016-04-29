@@ -13,7 +13,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	// Gets the radius of the Ogre::Entity sphere
 	kinematic = true;
 
-	shape = new btSphereShape((ent->getBoundingBox().getSize().x)*scale);
+	shape = new btSphereShape((ent->getBoundingBox().getSize().x)*scale*.75);
 
 	// auto var = ent->getBoundingBox();
 

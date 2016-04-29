@@ -14,6 +14,7 @@
 #include "OgreMotionState.h"
 #include "Simulator.h"
 #include "GameObject.h"
+#include "MeshSlicer.h"
 
 using namespace Ogre;
 
@@ -242,9 +243,25 @@ void Application::update(const FrameEvent &evt) {
 			// (*i)->getNode()->removeAndDestroyAllChildren();
 			mSceneManager->destroyEntity(entName);
 			// mSceneManager->destroyEntity("Particle_"+entName);
-
 		}
 	}
+
+
+	
+	// //Spawn new Asteroids
+	// asteroidCount++;
+	// float posX = (float)(rand() % 100 + 15000);
+	// float posY = (float)(rand() % 100 + 15000);
+	// float posZ = (float)(rand() % 100 + 15000);
+
+	// Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
+
+	// if(asteroidCount % 2 == 0){
+	// 	createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+	// }
+	// else{
+	// 	createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+	// }
 }
 
 

@@ -58,8 +58,8 @@ void Laser::update() {
 			// Check for wall collision but not twice in a row
 			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT && context->getTheObject() != previousHit ) {
 				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
-				alive = false;
 				std::cout << "Wall hit" << std::endl;
+				alive = false;
 			}
 			if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
 				std::cout << context->getTheObject()->getName() <<" Hit!" << std::endl;

@@ -17,7 +17,7 @@ Wall::~Wall(){
 
 void Wall::update() {
 
-	static int MAX_DT = 4;
+	// static int MAX_DT = 4;
 
 	// if (context->hit) {
 	// 	Ogre::Real dt = gameManager->getTime() - lastHitTime;

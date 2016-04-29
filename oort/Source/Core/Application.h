@@ -39,7 +39,7 @@
 #include "Wall.h"
 #include "Laser.h"
 #include "Asteroid.h"
-#include "MeshSlicer.h"
+
 
 class Application : public Ogre::FrameListener, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
 {

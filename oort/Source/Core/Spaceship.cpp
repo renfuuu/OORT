@@ -77,7 +77,7 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 		Ogre::Vector3 look = mNode->getOrientation().zAxis();
 		Ogre::Vector3 wallNormal = dynamic_cast<Wall*>(context->getTheObject())->normal;
-		std::cout << "Wall Normal: " << wallNormal << "\nLook: " << look << std::endl;
+		// std::cout << "Wall Normal: " << wallNormal << "\nLook: " << look << std::endl;
 
 		Ogre::Real dotProduct = look.dotProduct(wallNormal);
 		

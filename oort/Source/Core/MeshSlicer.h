@@ -40,7 +40,6 @@ struct vec3i
 
 struct XML_Mesh
 {
-
 	XMLDocument doc;
 
 	std::vector<vec3f> verts;
