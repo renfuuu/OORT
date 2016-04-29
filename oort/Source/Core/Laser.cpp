@@ -6,10 +6,19 @@
 Laser::Laser(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Vector3 scal, bool kin) : 
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	// Gets the radius of the Ogre::Entity sphere
-	shape = new btSphereShape((ent->getBoundingBox().getHalfSize().x)*scale);
+	// shape = new btSphereShape((ent->getBoundingBox().getHalfSize().x)*scale);
+
+	auto var = ent->getBoundingBox();
+
+	// Bullet uses half margins for collider
+	auto size = var.getSize()/2;
+
+	shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
 	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
 	Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle_"+nme);
 	particleNode->attachObject(particle);
+
+	alive = true;
 
 }
 
@@ -33,32 +42,29 @@ void Laser::moveLaser()
 }
 
 void Laser::update() {
+	static int MAX_DT = 5;
 
 	if (context->hit) {
+		Ogre::Real dt = gameManager->getTime() - lastHitTime;
+		if ( dt > MAX_DT )
+			lastHitTime = gameManager->getTime();
 
 
 		// startScore();
 		// if(previousHit != nullptr) {
-		// 	// Check for paddle collision but not twice in a row
-		// 	if( context->getTheObject()->getType() == GameObject::PADDLE_OBJECT && context->getTheObject() != previousHit ) {
-		// 		gameManager->playSound(GameManager::PADDLE_BOUNCE);
-		// 	}		
+			// Check for wall collision but not twice in a row
+			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit */) {
+				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
+				alive = false;
+				std::cout << "Wall hit" << std::endl;
+			}
+			if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
+				std::cout << "Asteroid Hit!" << std::endl;
+				alive = false;
+			}
 
-		// 	if (gameManager->isServer() ) {
-		// 		//Score only when you hit behind your opponent.
-		// 		if ( context->getTheObject()->getType() == GameObject::BACK_WALL_OBJECT && previousHit->getType() != GameObject::BACK_WALL_OBJECT) {
-		// 			gameManager->scorePoints(1);
-		// 			gameManager->playSound(GameManager::SCORE);
-		// 			reset(startPos);
-		// 		}
-		// 		else if ( context->getTheObject()->getType() == GameObject::FRONT_WALL_OBJECT && previousHit->getType() != GameObject::FRONT_WALL_OBJECT) {
-		// 			Ogre::Vector3 vec(-startPos.x, startPos.y, -startPos.z);
-		// 			gameManager->scoreOpponentPoints(1);
-		// 			reset(vec);
-		// 		}
-		// 	}
 		// }
 		
-		// previousHit = context->getTheObject();
+		previousHit = context->getTheObject();
 	}
 }

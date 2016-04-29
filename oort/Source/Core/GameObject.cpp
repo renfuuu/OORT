@@ -85,7 +85,7 @@ void GameObject::addToSimulator() {
 	body->setUserPointer(this);
 
 	if (kinematic) {
-		std::cout << "Kinematic\n"; 
+		// std::cout << "Kinematic\n"; 
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		body->setActivationState(DISABLE_DEACTIVATION);
 	}

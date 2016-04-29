@@ -160,10 +160,10 @@ void Application::update(const FrameEvent &evt) {
 	float temp = t1->getMilliseconds();
 	float tts = 250.0;
 	if ((temp - dTime) >= tts) {
-		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left) && laserCount < 6){
+		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
 			laserCount ++;
-			// std::cout << laserCount << std::endl;
-			createLaser("Laser " + laserCount, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			Ogre::String name = "Laser_" + std::to_string(laserCount);
+			createLaser(name, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 			dTime = temp;
 		}
 	}
@@ -291,6 +291,8 @@ Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogr
 	sn->translate(175.0f * look);
 	ent->setMaterialName("Laser");
 
+	sn->showBoundingBox(true);
+
 	Laser* obj = new Laser(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
 	obj->addToSimulator();
 	obj->velocity = _theSpaceship->getNode()->getOrientation().zAxis();
@@ -299,11 +301,14 @@ Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogr
 	return obj;
 }
 
-Asteroid* Application::createAsteroid(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, Ogre::Vector3 position, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+Asteroid* Application::createAsteroid(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
 	createRootEntity(nme, meshName, position.x, position.y, position.z);
 	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
 	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
 	sn->setScale(scale,scale,scale);
+	sn->roll(Ogre::Degree(rotate.x));
+	sn->yaw(Ogre::Degree(rotate.y));
+	sn->pitch(Ogre::Degree(rotate.z));
 	sn->showBoundingBox(true);
 	const btTransform pos;
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
@@ -599,12 +604,20 @@ void Application::createObjects(void) {
 	createWall("backwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(0,7500,-7500), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	createWall("rightwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 
-	for(int i = 0; i < 6; i++){
+	for(int i = 0; i < 20; i++){
 		asteroidCount++;
-		float posX = (float)(rand() % 15000 - 7500);
-		float posY = (float)(rand() % 15000);
-		float posZ = (float)(rand() % 15000 - 7500);
-		createAsteroid("Asteroid" + asteroidCount, GameObject::objectType::ASTEROID_OBJECT, "Asteroid.mesh", Ogre::Vector3(posX, posY, posZ), 250, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+		float posX = (float)(rand() % 14750 - 7500);
+		float posY = (float)(rand() % 14750);
+		float posZ = (float)(rand() % 14750 - 7500);
+
+		Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
+
+		if(asteroidCount % 2 == 0){
+			createAsteroid("Asteroid" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+		}
+		else
+			createAsteroid("Asteroid" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+
 	}
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);

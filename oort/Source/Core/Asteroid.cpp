@@ -12,12 +12,15 @@ Asteroid::Asteroid(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManag
 GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin) {
 	// Gets the radius of the Ogre::Entity sphere
 	kinematic = true;
-	auto var = ent->getBoundingBox();
 
-	// Bullet uses half margins for collider
-	auto size = var.getSize()/2;
+	shape = new btSphereShape((ent->getBoundingBox().getHalfSize().x)*scale);
 
-	shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
+	// auto var = ent->getBoundingBox();
+
+	// // Bullet uses half margins for collider
+	// auto size = var.getSize()/2;
+
+	// shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
 
 	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
 	// Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle");
@@ -26,6 +29,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	velocity = 1.0f;
 
 	hitWall = false;
+	alive = true;
 
 }
 
@@ -45,17 +49,17 @@ void Asteroid::update() {
 
 
 		// startScore();
-		if(previousHit != nullptr) {
+		// if(previousHit != nullptr) {
 			// Check for wall collision but not twice in a row
 			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit */) {
 				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
-				hitWall = true;
+				// hitWall = true;
 			}
-			else if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
-
+			else if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
+				alive = false;
 			}
 
-		}
+		// }
 		
 		previousHit = context->getTheObject();
 	}
