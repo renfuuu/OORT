@@ -3,9 +3,18 @@
 
 XML_Mesh::XML_Mesh(std::string filename)
 {
-	doc.LoadFile( filename );
+	doc.LoadFile( filename.c_str() );
+	if(doc.Error())
+		doc.PrintError();
+	else
+		std::cout << "Parsing " << filename << "complete" << std::endl;
 }
 
+
+XML_Mesh::XML_Mesh()
+{
+
+}
 XML_Mesh::~XML_Mesh()
 {
 
@@ -13,7 +22,6 @@ XML_Mesh::~XML_Mesh()
 
 void XML_Mesh::run()
 {
-    doc.LoadFile( "dream.xml" );
 
     // Structure of the XML file:
     // - Element "PLAY"      the root Element, which is the 
@@ -23,13 +31,16 @@ void XML_Mesh::run()
 
     // Navigate to the title, using the convenience function,
     // with a dangerous lack of error checking.
-    const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
-    printf( "Name of play (1): %s\n", title );
+	XMLNode* pVert = doc.FirstChild( "mesh" )->FirstChild("sharedgeometry");
+    XMLNode* pFace = doc.FirstChild( "mesh" )->FirstChild("submeshes");
+    std::cout << pVert->ToElement()->IntAttribute("vertexcount");
 
-    // Text is just another Node to TinyXML-2. The more
-    // general way to get to the XMLText:
-    XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
-    title = textNode->Value();
-    printf( "Name of play (2): %s\n", title );
+    for(XMLNode* node = pVert->FirstChildElement("vertex"); node != node->LastSibling(); node = node->NextSibling())
+    {
+    	std::cout << node->FirstChildElement("position")
+    }
+
+    system("OgreXMLConverter");
+
 }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdlib>
 
+using namespace tinyxml2;
 
 struct vec3f
 {
@@ -29,7 +30,9 @@ struct XML_Mesh
  	std::vector<vec3i> faces;
  	std::string path;
 
- 	XML_Mesh(std::string filename);
+ 	XML_Mesh();
+ 	XML_Mesh(std::string m);
+
  	~XML_Mesh();
 	void run();
 };

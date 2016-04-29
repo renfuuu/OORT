@@ -25,6 +25,9 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <streambuf>
 
 #include <stdlib.h>
 #include <time.h>
@@ -36,6 +39,7 @@
 #include "Wall.h"
 #include "Laser.h"
 #include "Asteroid.h"
+#include "MeshSlicer.h"
 
 class Application : public Ogre::FrameListener, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
 {
