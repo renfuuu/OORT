@@ -9,6 +9,8 @@ public:
 
 	bool hitWall;
 	Ogre::Real velocity;
+	
+	bool alive;
 
 	virtual void update();
 	void move();
