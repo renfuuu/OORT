@@ -34,6 +34,7 @@ void Application::init()
 	try{
 		t1 = new Timer();
 
+		
 		srand(time(0));
 
 		_simulator = new Simulator();
@@ -57,10 +58,47 @@ void Application::init()
 
 		createObjects();
 
+		
+
 	}
 	catch (Exception e) {
 		std::cout << "Exception Caught: " << e.what() << std::endl;
 	}
+
+
+
+	// std::ifstream file( "../Assets/Scripts/dream.xml" );
+ //    std::stringstream buffer;
+
+ //    if ( file )
+ //    {
+
+ //        buffer << file.rdbuf();
+
+ //        file.close();
+
+ //        // operations on the buffer...
+ //    }
+ //    else
+ //    {
+ //    	std::cout << "Could not find file" << std::endl;
+ //    }
+	// std::cout << "********************" << std::endl;
+
+    // std::cout << buffer.str().size();
+
+	
+    std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
+	XML_Mesh ms(meshfile);
+	
+	// ms.doc.Parse(buffer.str().c_str());
+
+	if(ms.doc.Error())
+		ms.doc.PrintError();
+	else
+		std::cout << "Loading complete" << std::endl;
+
+	ms.run();
 
 }
 
