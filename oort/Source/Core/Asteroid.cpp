@@ -13,7 +13,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	// Gets the radius of the Ogre::Entity sphere
 	kinematic = true;
 
-	shape = new btSphereShape((ent->getBoundingBox().getHalfSize().x)*scale);
+	shape = new btSphereShape((ent->getBoundingBox().getSize().x)*scale);
 
 	// auto var = ent->getBoundingBox();
 
@@ -49,23 +49,28 @@ void Asteroid::update() {
 
 
 		// startScore();
-		// if(previousHit != nullptr) {
+		if(previousHit != nullptr) {
 			// Check for wall collision but not twice in a row
 			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit */) {
 				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
 				// hitWall = true;
 			}
-			else if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
+			if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
+				// std::cout << context->getTheObject()->getName() << " hit: " << name << std::endl;
+			}
+			if( context->getTheObject()->getType() == GameObject::SPACESHIP_OBJECT && context->getTheObject() != previousHit ) {
+				alive = false;
+				// std::cout << "Spaceship hit: " << name << std::endl;
 			}
 
-		// }
+		}
 		
 		previousHit = context->getTheObject();
 	}
 }
 
-void Asteroid::move() {
+void Asteroid::moveAsteroid(Ogre::SceneNode* ssNode) {
 
 	Ogre::SceneNode* mNode = rootNode;
 
@@ -86,7 +91,9 @@ void Asteroid::move() {
 	}else{
 		
 
-		Ogre::Vector3 look = mNode->getOrientation().zAxis();
+		// Ogre::Vector3 look = mNode->getOrientation().zAxis();
+		Ogre::Vector3 look = ssNode->getPosition() - mNode->getPosition();
+		look.normalise();
 		mNode->translate(velocity*look);
 	}
 

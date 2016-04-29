@@ -163,7 +163,7 @@ void Application::update(const FrameEvent &evt) {
 		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
 			laserCount ++;
 			Ogre::String name = "Laser_" + std::to_string(laserCount);
-			createLaser(name, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			createLaser(name, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 			dTime = temp;
 		}
 	}
@@ -175,10 +175,37 @@ void Application::update(const FrameEvent &evt) {
 	// Small pull toward paddle to make it easier for the player to hit the ball
 	// int pull = 500;
 	// Ogre::Vector3 paddleAttract = (_theSpaceship->getNode()->getPosition() - _theBall->getNode()->getPosition()).normalisedCopy();
+	// int index = 0;
 	for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
 	{
-		// (*i)->applyForce(0,0,500);
-		(*i)->moveLaser();
+		if((*i)->alive){
+			(*i)->moveLaser();
+		}
+		else{
+			// Delete the laser 
+			Ogre::String entName = (*i)->getName();
+			(*i)->getNode()->detachAllObjects();
+			(*i)->getNode()->removeAndDestroyAllChildren();
+			mSceneManager->destroyEntity(entName);
+			mSceneManager->destroyEntity("Particle_"+entName);
+
+		}
+	}
+
+	for (std::vector<Asteroid*>::iterator i = asteroids.begin(); i != asteroids.end(); ++i)
+	{
+		if((*i)->alive){
+			(*i)->moveAsteroid(_theSpaceship->getNode());
+		}
+		else{
+			// Delete the asteroid
+			Ogre::String entName = (*i)->getName();
+			(*i)->getNode()->detachAllObjects();
+			// (*i)->getNode()->removeAndDestroyAllChildren();
+			mSceneManager->destroyEntity(entName);
+			// mSceneManager->destroyEntity("Particle_"+entName);
+
+		}
 	}
 }
 
@@ -291,7 +318,7 @@ Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogr
 	sn->translate(175.0f * look);
 	ent->setMaterialName("Laser");
 
-	sn->showBoundingBox(true);
+	// sn->showBoundingBox(true);
 
 	Laser* obj = new Laser(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
 	obj->addToSimulator();
@@ -309,7 +336,7 @@ Asteroid* Application::createAsteroid(Ogre::String nme, GameObject::objectType t
 	sn->roll(Ogre::Degree(rotate.x));
 	sn->yaw(Ogre::Degree(rotate.y));
 	sn->pitch(Ogre::Degree(rotate.z));
-	sn->showBoundingBox(true);
+	// sn->showBoundingBox(true);
 	const btTransform pos;
 	OgreMotionState* ms = new OgreMotionState(pos, sn);
 
@@ -613,10 +640,10 @@ void Application::createObjects(void) {
 		Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
 
 		if(asteroidCount % 2 == 0){
-			createAsteroid("Asteroid" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 		}
 		else
-			createAsteroid("Asteroid" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 
 	}
 

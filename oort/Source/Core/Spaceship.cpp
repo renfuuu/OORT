@@ -55,10 +55,10 @@ void Spaceship::update() {
 				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
 				hitWall = true;
 			}
-			else if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
-				alive = false;
-				std::cout << "Ship hit an asteroid" << std::endl;
-			}
+			// if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
+			// 	alive = false;
+			// 	std::cout << "Ship hit an asteroid" << std::endl;
+			// }
 
 		// }
 		
@@ -70,13 +70,15 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 	Ogre::SceneNode* mNode = rootNode;
 
-	if(hitWall){
+	if(hitWall && context->getTheObject()->getType() != GameObject::LASER_OBJECT){
 
 		mNode->yaw(Ogre::Degree(0.5));
 		yawAngle += Ogre::Degree(0.5);
 
 		Ogre::Vector3 look = mNode->getOrientation().zAxis();
 		Ogre::Vector3 wallNormal = dynamic_cast<Wall*>(context->getTheObject())->normal;
+		std::cout << "Wall Normal: " << wallNormal << "\nLook: " << look << std::endl;
+
 		Ogre::Real dotProduct = look.dotProduct(wallNormal);
 		
 		//if the look dotted with the wall's normal is negative then keep yawing
@@ -129,14 +131,14 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 		}
 		if (kb && kb->isKeyDown(OIS::KC_A))
 		{
-			yawAngle += Ogre::Degree(-0.5);
-			mNode->yaw(Ogre::Degree(-0.5));
+			yawAngle += Ogre::Degree(0.5);
+			mNode->yaw(Ogre::Degree(0.5));
 			// camNode->yaw(Ogre::Degree(-0.5));
 		}
 		if (kb && kb->isKeyDown(OIS::KC_D))
 		{
-			yawAngle += Ogre::Degree(0.5);
-			mNode->yaw(Ogre::Degree(0.5));
+			yawAngle += Ogre::Degree(-0.5);
+			mNode->yaw(Ogre::Degree(-0.5));
 			// camNode->yaw(Ogre::Degree(0.5));
 		}
 		if (kb && kb->isKeyDown(OIS::KC_Q))
