@@ -19,7 +19,8 @@ using namespace Ogre;
 
 Application::Application():
 	camChange(0),
-	laserCount(-1)
+	laserCount(0),
+	asteroidCount(0)
 {
 }
 
@@ -32,6 +33,8 @@ void Application::init()
 
 	try{
 		t1 = new Timer();
+
+		srand(time(0));
 
 		_simulator = new Simulator();
 		
@@ -292,6 +295,22 @@ Laser* Application::createLaser(Ogre::String nme, GameObject::objectType tp, Ogr
 	obj->addToSimulator();
 	obj->velocity = _theSpaceship->getNode()->getOrientation().zAxis();
 	lasers.push_back(obj);
+
+	return obj;
+}
+
+Asteroid* Application::createAsteroid(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, Ogre::Vector3 position, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim) {
+	createRootEntity(nme, meshName, position.x, position.y, position.z);
+	Ogre::SceneNode* sn = mSceneManager->getSceneNode(nme);
+	Ogre::Entity* ent = SceneHelper::getEntity(mSceneManager, nme, 0);
+	sn->setScale(scale,scale,scale);
+	sn->showBoundingBox(true);
+	const btTransform pos;
+	OgreMotionState* ms = new OgreMotionState(pos, sn);
+
+	Asteroid* obj = new Asteroid(nme, tp, mSceneManager, ssm, sn, ent, ms, mySim, mss, rest, frict, scale, kinematic);
+	obj->addToSimulator();
+	asteroids.push_back(obj);
 
 	return obj;
 }
@@ -564,21 +583,13 @@ void Application::createObjects(void) {
 	
 	mSceneManager->setSkyDome(true, "Examples/SpaceSkyPlane", 5, 8);
 
-	// This paddle gets a negative Z coordinate that becomes positive in the function on movepaddle
 	_theSpaceship = createSpaceship("spaceship", GameObject::objectType::SPACESHIP_OBJECT, "Plane.mesh", 0, 600, 600, 50, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
-	// _otherPaddle = createPaddle("other_paddle", GameObject::objectType::PADDLE_OBJECT, "paddle-blue.mesh", 0, 0, 825, 100, mSceneManager, gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
-	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 800, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, _simulator);
 
-	//adding a forever orbit camera
+	//setup a forever orbit camera scenenode
 	_camNode = _theSpaceship->getNode()->createChildSceneNode("Cam Node");
 	_camNode->attachObject(spaceshipCam);
 	_camNode->translate(Ogre::Vector3(0,15,-75));
 	spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
-
- //    wallNode4->yaw(Ogre::Degree(270));
-	//(pitch, yaw, roll)
-
- //    wallNode4->setPosition(750, 375, 0);
 
 	//creating walls
 	createWall("floor", GameObject::objectType::UP_DOWN_WALL_OBJECT, "upDown", 15000, 15000, Ogre::Vector3(0,0,0), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
@@ -588,13 +599,10 @@ void Application::createObjects(void) {
 	createWall("backwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(0,7500,-7500), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	createWall("rightwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 
-
-	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, _simulator);
-	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("frontwall", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", -20000, -20000, 20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, _simulator);
-	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, -20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
-	// createWall("ceiling", GameObject::objectType::FLOOR_OBJECT, "ceiling.mesh", -20000, 20000, -20000, Ogre::Vector3(40000, 40000, 40000), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, _simulator);
+	for(int i = 0; i < 20; i++){
+		asteroidCount++;
+		createAsteroid("Asteroid" + asteroidCount, GameObject::objectType::ASTEROID_OBJECT, "Asteroid.mesh", Ogre::Vector3((float)(rand() % 15000 - 7500),(float)(rand() % 15000),(float)(rand() % 15000 - 7500)), 250, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+	}
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
 	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);
