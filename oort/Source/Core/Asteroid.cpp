@@ -32,6 +32,9 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 Asteroid::~Asteroid() {
 }
 
+
+
+
 void Asteroid::update() {
 	static int MAX_DT = 5;
 

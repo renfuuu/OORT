@@ -453,6 +453,141 @@ private:
     }
 };
 
+enum Camera_Movement {
+    FORWARD,
+    BACKWARD,
+    LEFT,
+    RIGHT
+};
+
+// Default camera values
+const GLfloat YAW        = -90.0f;
+const GLfloat PITCH      =  0.0f;
+const GLfloat SPEED      =  3.0f;
+const GLfloat SENSITIVTY =  0.25f;
+const GLfloat ZOOM       =  45.0f;
+
+
+// An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
+class Camera
+{
+public:
+    // Camera Attributes
+    glm::vec3 Position;
+    glm::vec3 Front;
+    glm::vec3 Up;
+    glm::vec3 Right;
+    glm::vec3 WorldUp;
+    // Eular Angles
+    GLfloat Yaw;
+    GLfloat Pitch;
+    // Camera options
+    GLfloat MovementSpeed;
+    GLfloat MouseSensitivity;
+    GLfloat Zoom;
+
+    // Constructor with vectors
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    {
+        this->Position = position;
+        this->WorldUp = up;
+        this->Yaw = yaw;
+        this->Pitch = pitch;
+        this->updateCameraVectors();
+    }
+    // Constructor with scalar values
+    Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    {
+        this->Position = glm::vec3(posX, posY, posZ);
+        this->WorldUp = glm::vec3(upX, upY, upZ);
+        this->Yaw = yaw;
+        this->Pitch = pitch;
+        this->updateCameraVectors();
+    }
+
+    ~Camera()
+    {}
+
+    // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
+    glm::mat4 GetViewMatrix()
+    {
+        return glm::lookAt(this->Position, this->Position + this->Front, this->Up);
+    }
+
+    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+    void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
+    {
+        GLfloat velocity = this->MovementSpeed * deltaTime;
+        if (direction == FORWARD)
+        {
+          this->Position += this->Front * velocity;
+        }
+        if (direction == BACKWARD)
+        {
+          this->Position -= this->Front * velocity;
+        }
+        if (direction == LEFT)
+        {
+          this->Position -= this->Right * velocity;
+        }
+        if (direction == RIGHT)
+        {
+          this->Position += this->Right * velocity;
+        }
+
+        std::cout << "pos:: ";
+        std::cout << "x: " << this->Position[0] << "y: " << this->Position[1] << "z: " << this->Position[2] <<std::endl;
+    }
+
+    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+    void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true)
+    {
+        xoffset *= this->MouseSensitivity;
+        yoffset *= this->MouseSensitivity;
+
+        this->Yaw   += xoffset;
+        this->Pitch += yoffset;
+
+        // Make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (constrainPitch)
+        {
+            if (this->Pitch > 89.0f)
+                this->Pitch = 89.0f;
+            if (this->Pitch < -89.0f)
+                this->Pitch = -89.0f;
+        }
+
+        // Update Front, Right and Up Vectors using the updated Eular angles
+        this->updateCameraVectors();
+    }
+
+    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+    void ProcessMouseScroll(GLfloat yoffset)
+    {
+        if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
+            this->Zoom -= yoffset;
+        if (this->Zoom <= 1.0f)
+            this->Zoom = 1.0f;
+        if (this->Zoom >= 45.0f)
+            this->Zoom = 45.0f;
+    }
+
+private:
+    // Calculates the front vector from the Camera's (updated) Eular Angles
+    void updateCameraVectors()
+    {
+        // Calculate the new Front vector
+        glm::vec3 front;
+        front.x = cos(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
+        front.y = sin(glm::radians(this->Pitch));
+        front.z = sin(glm::radians(this->Yaw)) * cos(glm::radians(this->Pitch));
+        this->Front = glm::normalize(front);
+        // Also re-calculate the Right and Up vector
+        this->Right = glm::normalize(glm::cross(this->Front, this->WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+        this->Up    = glm::normalize(glm::cross(this->Right, this->Front));
+    }
+};
+
 class Texture2D
 {
 public:
@@ -848,183 +983,447 @@ class Mesh2d
       glBindVertexArray(0);
     }
 };
+//------------------------------------------------------------------------------------------------
+
+// // GLFW function declerations
+// void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 
-// GLFW function declerations
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+// SpriteRenderer* Renderer;
+// TriangleRenderer* TriRender;
 
 
-
-SpriteRenderer* Renderer;
-TriangleRenderer* TriRender;
-
-
-Mesh2d* mesh1;
-Mesh2d* mesh2;
-Mesh2d* mesh3;
+// Mesh2d* mesh1;
+// Mesh2d* mesh2;
+// Mesh2d* mesh3;
 
 
-void init()
-{
+// void init()
+// {
 
 
-  glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCREEN_WIDTH), 
-      static_cast<GLfloat>(SCREEN_HEIGHT), 0.0f, -100.0f, 100.0f);
+//   glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCREEN_WIDTH), 
+//       static_cast<GLfloat>(SCREEN_HEIGHT), 0.0f, -100.0f, 100.0f);
   
 
-  // Load shaders
-  ResourceManager::LoadShader("shaders/triangle.vs", "shaders/triangle.frag", nullptr, "tri");
-  ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+//   // Load shaders
+//   ResourceManager::LoadShader("shaders/triangle.vs", "shaders/triangle.frag", nullptr, "tri");
+//   ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
   
-  // Configure shaders
-  ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
-  ResourceManager::GetShader("tri").Use().SetInteger("image", 0);
+//   // Configure shaders
+//   ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+//   ResourceManager::GetShader("tri").Use().SetInteger("image", 0);
 
-  ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-  ResourceManager::GetShader("tri").SetMatrix4("projection", projection);
-  ResourceManager::LoadTexture("textures/awesomeface.png", GL_TRUE, "face");
+//   ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+//   ResourceManager::GetShader("tri").SetMatrix4("projection", projection);
+//   ResourceManager::LoadTexture("textures/awesomeface.png", GL_TRUE, "face");
 
-  Shader triangleShader;
-  triangleShader = ResourceManager::GetShader("tri");
-  TriRender = new TriangleRenderer(triangleShader);
+//   Shader triangleShader;
+//   triangleShader = ResourceManager::GetShader("tri");
+//   TriRender = new TriangleRenderer(triangleShader);
 
-  // Set render-specific controls
-  Shader spriteShader;
-  spriteShader = ResourceManager::GetShader("sprite");
-  Renderer = new SpriteRenderer(spriteShader);  // Load textures
+//   // Set render-specific controls
+//   Shader spriteShader;
+//   spriteShader = ResourceManager::GetShader("sprite");
+//   Renderer = new SpriteRenderer(spriteShader);  // Load textures
 
 
 
 
  
 
-  // ResourceManager::LoadShader("shaders/mesh2d.vs", "shaders/mesh2d.frag", nullptr, "mesh2d");
-  // ResourceManager::GetShader("mesh2d").SetMatrix4("projection", projection);
-  // Shader meshShader;
-  // meshShader = ResourceManager::GetShader("mesh2d");
+//   // ResourceManager::LoadShader("shaders/mesh2d.vs", "shaders/mesh2d.frag", nullptr, "mesh2d");
+//   // ResourceManager::GetShader("mesh2d").SetMatrix4("projection", projection);
+//   // Shader meshShader;
+//   // meshShader = ResourceManager::GetShader("mesh2d");
 
-  // std::string objfilename = "obj/alligator.obj";
-  // mesh1 = new Mesh2d(objfilename, meshShader);
+//   // std::string objfilename = "obj/alligator.obj";
+//   // mesh1 = new Mesh2d(objfilename, meshShader);
 
-  // objfilename = "obj/bunny.obj";
-  // mesh2 = new Mesh2d(objfilename, meshShader);
+//   // objfilename = "obj/bunny.obj";
+//   // mesh2 = new Mesh2d(objfilename, meshShader);
 
-  // objfilename = "obj/triangle.obj";
-  // mesh3 = new Mesh2d(objfilename, meshShader);
-
-
+//   // objfilename = "obj/triangle.obj";
+//   // mesh3 = new Mesh2d(objfilename, meshShader);
 
 
-}
 
-void render()
+
+// }
+
+// void render()
+// {
+//   Renderer->DrawSprite(ResourceManager::GetTexture("face"), 
+//         glm::vec2(200, 200), glm::vec2(100, 100), 0.45f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+//   // mesh1->DrawMesh(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.25f), 0.0f, glm::vec3(0.0f,0.6f,0.4f));
+//   // mesh2->DrawMesh(glm::vec2(0.2f, 0.5f), glm::vec2(1.0f, 1.0f), 0.0f, glm::vec3(0.0f,0.6f,0.0f));
+//   // mesh3->DrawMesh(glm::vec2(0.7f, 0.2f), glm::vec2(1.0f, 1.0f), 0.0f, glm::vec3(1.0f,0.0f,0.0f));
+//   TriRender->DrawTriangle(ResourceManager::GetTexture("face"), glm::vec2(200, 200), glm::vec2(50, 50), 0.0f, glm::vec3(1.0f,1.0f,1.0f));
+// }
+
+// void cleanup()
+// {
+//   delete Renderer;
+//   delete TriRender;
+//   delete mesh1;
+//   delete mesh2;
+//   delete mesh3;
+
+// }
+// class BoidSpace;
+
+// struct Boid
+// {
+//   glm::vec2 mPosition;
+//   glm::vec2 mDirection;
+//   BoidSpace* pSpace;
+//   glm::vec3 mColor;
+//   float mSpeed;
+
+//   Boid(glm::vec2 pos, glm::vec2 dir, glm::vec3 color, BoidSpace* space)
+//     : mPosition(pos), mDirection(dir), mColor(color), pSpace(space)
+//   {
+//     mSpeed = 2.0;
+//   }
+
+//   void update()
+//   {
+//     mPosition += mSpeed*mDirection;
+//   }
+
+//   void render(TriangleRenderer* tr)
+//   {
+//     // tr.DrawTriangle(mPosition, );
+//   }
+// };
+
+// int main(int argc, char *argv[])
+// {
+//     glfwInit();
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+//     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2D Animation", nullptr, nullptr);
+//     glfwMakeContextCurrent(window);
+
+//     glewExperimental = GL_TRUE;
+//     glewInit();
+//     glGetError(); // Call it once to catch glewInit() bug, all other errors are now from our application.
+
+//     glfwSetKeyCallback(window, key_callback);
+
+//     // OpenGL configuration
+//     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+//     // glEnable(GL_CULL_FACE);
+//     // glEnable(GL_BLEND);
+//     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+//     // DeltaTime variables
+//     GLfloat deltaTime = 0.0f;
+//     GLfloat lastFrame = 0.0f;
+
+//     init();
+
+//     while (!glfwWindowShouldClose(window))
+//     {
+//         // Calculate delta time
+//         GLfloat currentFrame = glfwGetTime();
+//         deltaTime = currentFrame - lastFrame;
+//         lastFrame = currentFrame;
+//         glfwPollEvents();
+
+
+
+//         // Render
+//         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//         glClear(GL_COLOR_BUFFER_BIT);
+
+//         render();
+//         glfwSwapBuffers(window);
+//     }
+
+//     // Delete all resources as loaded using the resource manager
+//     ResourceManager::Clear();
+//     cleanup();
+//     glfwTerminate();
+//     return 0;
+// }
+
+// void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+// {
+//     // When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
+//     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+//         glfwSetWindowShouldClose(window, GL_TRUE);
+// }
+
+//-------------------------------------------------------------------------------
+
+
+// Properties
+GLuint screenWidth = 800, screenHeight = 600;
+
+// Function prototypes
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void Do_Movement();
+
+// Camera
+Camera* camera;
+bool keys[1024];
+GLfloat lastX = 400, lastY = 300;
+bool firstMouse = true;
+
+GLfloat deltaTime = 0.0f;
+GLfloat lastFrame = 0.0f;
+
+// The MAIN function, from here we start our application and run our Game loop
+int main()
 {
-  Renderer->DrawSprite(ResourceManager::GetTexture("face"), 
-        glm::vec2(200, 200), glm::vec2(100, 100), 0.45f, glm::vec3(0.0f, 1.0f, 0.0f));
-
-  // mesh1->DrawMesh(glm::vec2(0.0f, 0.0f), glm::vec2(0.5f, 0.25f), 0.0f, glm::vec3(0.0f,0.6f,0.4f));
-  // mesh2->DrawMesh(glm::vec2(0.2f, 0.5f), glm::vec2(1.0f, 1.0f), 0.0f, glm::vec3(0.0f,0.6f,0.0f));
-  // mesh3->DrawMesh(glm::vec2(0.7f, 0.2f), glm::vec2(1.0f, 1.0f), 0.0f, glm::vec3(1.0f,0.0f,0.0f));
-  TriRender->DrawTriangle(ResourceManager::GetTexture("face"), glm::vec2(200, 200), glm::vec2(50, 50), 0.0f, glm::vec3(1.0f,1.0f,1.0f));
-}
-
-void cleanup()
-{
-  delete Renderer;
-  delete TriRender;
-  delete mesh1;
-  delete mesh2;
-  delete mesh3;
-
-}
-class BoidSpace;
-
-struct Boid
-{
-  glm::vec2 mPosition;
-  glm::vec2 mDirection;
-  BoidSpace* pSpace;
-  glm::vec3 mColor;
-  float mSpeed;
-
-  Boid(glm::vec2 pos, glm::vec2 dir, glm::vec3 color, BoidSpace* space)
-    : mPosition(pos), mDirection(dir), mColor(color), pSpace(space)
-  {
-    mSpeed = 2.0;
-  }
-
-  void update()
-  {
-    mPosition += mSpeed*mDirection;
-  }
-
-  void render(TriangleRenderer* tr)
-  {
-    // tr.DrawTriangle(mPosition, );
-  }
-};
-
-int main(int argc, char *argv[])
-{
+    // Init GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2D Animation", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", nullptr, nullptr); // Windowed
     glfwMakeContextCurrent(window);
 
+    // Set the required callback functions
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // Options
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Initialize GLEW to setup the OpenGL Function pointers
     glewExperimental = GL_TRUE;
     glewInit();
-    glGetError(); // Call it once to catch glewInit() bug, all other errors are now from our application.
 
-    glfwSetKeyCallback(window, key_callback);
+    // Define the viewport dimensions
+    glViewport(0, 0, screenWidth, screenHeight);
 
-    // OpenGL configuration
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    // glEnable(GL_CULL_FACE);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Setup some OpenGL options
+    glEnable(GL_DEPTH_TEST);
 
+    // Setup and compile our shaders
+    Shader ourShader = ResourceManager::LoadShader("shaders/mesh2d.vs", "shaders/mesh2d.frag", nullptr, "mesh2d");
+    ResourceManager::GetShader("mesh2d").SetVector3f("meshColor", glm::vec3(1.0f,0.0f,0.0f));
+    // Set up our vertex data (and buffer(s)) and attribute pointers
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-    // DeltaTime variables
-    GLfloat deltaTime = 0.0f;
-    GLfloat lastFrame = 0.0f;
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-    init();
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-    while (!glfwWindowShouldClose(window))
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f), 
+        glm::vec3(2.0f, 5.0f, -15.0f), 
+        glm::vec3(-1.5f, -2.2f, -2.5f),  
+        glm::vec3(-3.8f, -2.0f, -12.3f),  
+        glm::vec3(2.4f, -0.4f, -3.5f),  
+        glm::vec3(-1.7f, 3.0f, -7.5f),  
+        glm::vec3(1.3f, -2.0f, -2.5f),  
+        glm::vec3(1.5f, 2.0f, -2.5f), 
+        glm::vec3(1.5f, 0.2f, -1.5f), 
+        glm::vec3(-1.3f, 1.0f, -1.5f)  
+    };
+
+    GLuint VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    // Bind our Vertex Array Object first, then bind and set our buffers and pointers.
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    // TexCoord attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0); // Unbind VAO
+
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    
+    // Game loop
+    while(!glfwWindowShouldClose(window))
     {
-        // Calculate delta time
+        // Set frame time
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        // Check and call events
         glfwPollEvents();
+        Do_Movement();
+
+        // Clear the colorbuffer
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw our first triangle
+        ourShader.Use();
+        
+        // Create camera transformation
+        glm::mat4 view;
+        view = camera->GetViewMatrix();
+        glm::mat4 projection; 
+        projection = glm::perspective(camera->Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 1000.0f);
+        // Get the uniform locations
+        GLint modelLoc = glGetUniformLocation(ourShader.ID, "model");
+        GLint viewLoc = glGetUniformLocation(ourShader.ID, "view");
+        GLint projLoc = glGetUniformLocation(ourShader.ID, "projection");
+        // Pass the matrices to the shader
+        // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+        // glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projection[0][0]);
+        ResourceManager::GetShader("mesh2d").SetMatrix4("projection", projection);
+        ResourceManager::GetShader("mesh2d").SetMatrix4("view", view);
+
+        glBindVertexArray(VAO);
+        for(GLuint i = 0; i < 10; i++)
+        {
+            // Calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model;
+            model = glm::translate(model, cubePositions[i]);
+            GLfloat angle = 20.0f * i; 
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+           
+
+            // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+
+            ResourceManager::GetShader("mesh2d").SetMatrix4("model", model);
 
 
-
-        // Render
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        render();
+            glDrawArrays(GL_TRIANGLES, 0, 36);      
+        }
+        glBindVertexArray(0);
+        // Swap the buffers
         glfwSwapBuffers(window);
     }
-
-    // Delete all resources as loaded using the resource manager
-    ResourceManager::Clear();
-    cleanup();
+    // Properly de-allocate all resources once they've outlived their purpose
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
     glfwTerminate();
     return 0;
 }
 
+// Moves/alters the camera positions based on user input
+void Do_Movement()
+{
+    // Camera controls
+    if(keys[GLFW_KEY_W])
+    {
+      std::cout << "HIT W" << std::endl;
+      camera->ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if(keys[GLFW_KEY_S])
+    {
+      std::cout << "HIT S" << std::endl;
+      camera->ProcessKeyboard(BACKWARD, deltaTime);
+    }
+    if(keys[GLFW_KEY_A])
+    {
+      std::cout << "HIT A" << std::endl;
+      camera->ProcessKeyboard(LEFT, deltaTime);
+    }
+    if(keys[GLFW_KEY_D])
+    {
+      std::cout << "HIT D" << std::endl;
+      camera->ProcessKeyboard(RIGHT, deltaTime);
+    }
+}
+
+// Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    // When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    //cout << key << endl;
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+    if (key >= 0 && key < 1024)
+    {
+        if(action == GLFW_PRESS)
+            keys[key] = true;
+        else if(action == GLFW_RELEASE)
+            keys[key] = false;  
+    }
 }
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if(firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    GLfloat xoffset = xpos - lastX;
+    GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+    
+    lastX = xpos;
+    lastY = ypos;
+
+    camera->ProcessMouseMovement(xoffset, yoffset);
+} 
+
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera->ProcessMouseScroll(yoffset);
+}
+
+
+
 
 /*
 
