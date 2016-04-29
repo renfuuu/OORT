@@ -599,9 +599,12 @@ void Application::createObjects(void) {
 	createWall("backwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(0,7500,-7500), Ogre::Vector3(0,0,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	createWall("rightwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 
-	for(int i = 0; i < 20; i++){
+	for(int i = 0; i < 6; i++){
 		asteroidCount++;
-		createAsteroid("Asteroid" + asteroidCount, GameObject::objectType::ASTEROID_OBJECT, "Asteroid.mesh", Ogre::Vector3((float)(rand() % 15000 - 7500),(float)(rand() % 15000),(float)(rand() % 15000 - 7500)), 250, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
+		float posX = (float)(rand() % 15000 - 7500);
+		float posY = (float)(rand() % 15000);
+		float posZ = (float)(rand() % 15000 - 7500);
+		createAsteroid("Asteroid" + asteroidCount, GameObject::objectType::ASTEROID_OBJECT, "Asteroid.mesh", Ogre::Vector3(posX, posY, posZ), 250, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 	}
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
