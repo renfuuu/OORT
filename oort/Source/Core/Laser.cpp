@@ -11,7 +11,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	auto var = ent->getBoundingBox();
 
 	// Bullet uses half margins for collider
-	auto size = var.getSize();
+	auto size = var.getSize() * 2.0;
 
 	shape = new btBoxShape(btVector3(size.x * scale, size.y * scale, size.z * scale));
 	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
@@ -56,15 +56,17 @@ void Laser::update() {
 		// startScore();
 		if(previousHit != nullptr) {
 			// Check for wall collision but not twice in a row
-			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT && context->getTheObject() != previousHit ) {
-				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
-				std::cout << "Wall hit" << std::endl;
-				alive = false;
-			}
-			if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
-				std::cout << context->getTheObject()->getName() <<" Hit!" << std::endl;
-				alive = false;
-			}
+			// if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit*/ ) {
+			// 	// gameManager->playSound(GameManager::PADDLE_BOUNCE);
+			// 	std::cout << "Wall hit" << std::endl;
+			// 	alive = false;
+			// 	simulator->removeObject(this);
+			// }
+			// if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
+			// 	std::cout << context->getTheObject()->getName() <<" Hit!" << std::endl;
+			// 	alive = false;
+			// 	simulator->removeObject(this);
+			// }
 
 		}
 		

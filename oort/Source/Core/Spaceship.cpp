@@ -55,10 +55,6 @@ void Spaceship::update() {
 				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
 				hitWall = true;
 			}
-			// if( context->getTheObject()->getType() == GameObject::ASTEROID_OBJECT && context->getTheObject() != previousHit ) {
-			// 	alive = false;
-			// 	std::cout << "Ship hit an asteroid" << std::endl;
-			// }
 
 		// }
 		

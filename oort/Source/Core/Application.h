@@ -49,6 +49,9 @@ public:
 
 	virtual void init();
 
+	enum State{ HOME, SINGLE, SERVER, CLIENT, ENDGAME, REPLAY, HOWTO };
+	State gameState = HOME;
+
 	Ogre::Root * mRoot;
 	Ogre::String mResourcesCfg;
 	Ogre::String mPluginsCfg;
@@ -70,6 +73,16 @@ public:
     CEGUI::OgreRenderer* mRenderer;
 
     //CEGUI Windows here
+    // CEGUI::Window* hostServerButton;
+    // CEGUI::Window* joinServerButton;
+    // CEGUI::Window* ipBox;
+    // CEGUI::Window* ipText;
+    // CEGUI::Window* ipWindow;
+    CEGUI::Window* singlePlayerButton;
+    CEGUI::Window* homeButton;
+    // CEGUI::Window* replayButton;
+    CEGUI::Window* howToButton;
+    CEGUI::Window* howToText;
 	
 	std::vector<Ogre::Camera*> cameras;
 	std::vector<Laser*> lasers;
@@ -85,12 +98,14 @@ public:
 
 	double fps = 300.0;
 
+	bool begin = false;
 	bool mRunning = true;
 
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent &evt) override;
 	void createRootEntity(std::string name, std::string mesh, int x, int y, int z);
 	void createChildEntity(std::string name, std::string mesh, Ogre::SceneNode* sceneNode, int x, int y, int z);
-	void update(const Ogre::FrameEvent &evt);
+	bool update(const Ogre::FrameEvent &evt);
+	bool handleGUI(const Ogre::FrameEvent &evt);
 	Spaceship* createSpaceship(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, int x, int y, int z, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	Wall* createWall(Ogre::String nme, GameObject::objectType tp, std::string type, int width, int height, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	Laser* createLaser(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, GameObject* sship, Ogre::Vector3 scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
@@ -105,5 +120,16 @@ public:
 	void setupGameManager(void);
 	void setupLighting(void);
 	void createObjects(void);
+
+	bool StartSinglePlayer(const CEGUI::EventArgs &e);
+	bool Quit(const CEGUI::EventArgs &e);
+	bool Home(const CEGUI::EventArgs &e);
+	bool HowTo(const CEGUI::EventArgs &e);
+
+
+	void hideGui();
+	void showGui();
+	void showEndGui();
+	void setState(State state);
 
 };

@@ -61,6 +61,7 @@ protected:
 	Ogre::ParticleSystem* particle;
 
 public:
+	bool alive;
 	BulletContactCallback* cCallBack;
 
 	GameObject(Ogre::String nme, GameObject::objectType tp, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::SceneNode* node, Ogre::Entity* ent, OgreMotionState* ms, Simulator* sim, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, Ogre::Real scal, bool kin);
@@ -85,4 +86,5 @@ public:
 	virtual void moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* camNode);
 	virtual Ogre::String getName(void);
 	virtual void setPoints(int points);
+	virtual void setStatus(bool status);
 };

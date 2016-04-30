@@ -17,6 +17,14 @@ void Simulator::addObject (GameObject* o) {
   dynamicsWorld->addRigidBody(o->getBody());       
 }
 
+bool Simulator::removeObject(GameObject* o) {
+	for(int i = 0; i < objList.size(); i ++){
+		if(objList[i] == o)
+			objList.erase(objList.begin() + i);
+	}
+	dynamicsWorld->removeRigidBody(o->getBody());
+}
+
 //Update the physics world state and any objects that have collision
 void Simulator::stepSimulation(const Ogre::Real elapsedTime, int maxSubSteps, const Ogre::Real fixedTimestep) {
 	dynamicsWorld->stepSimulation(elapsedTime, maxSubSteps, fixedTimestep);

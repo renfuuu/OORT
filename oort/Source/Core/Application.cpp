@@ -18,6 +18,9 @@
 
 using namespace Ogre;
 
+std::string instructions = "- To play alone, select Single Player\n- Choose to Host a game or join a game (requires two computers)\n- To join a game, one computer must be hosting and you must enter the public ip address of the machine that is hosting and press join game\n- Move the mouse up/down and left/right on the game window to control the paddle\n- Strike the ball with the paddle to propel it through the room and attempt to bypass your opponent's paddle\n- M mutes the sounds\n- Keys 1,2,3, and 4 change the camera angle (front, side,ball chase view, and free camera)\n- Free camera works as a camera man (WSAD or Arrow keys to move) hold shift to speed up\n- Escape key to quit or click the quit button";
+
+
 Application::Application():
 	camChange(0),
 	laserCount(0),
@@ -121,8 +124,6 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 	try {
 		_oisManager->capture();
 		// close window when ESC is pressed
-		if(_oisManager->getKeyPressed() == OIS::KC_ESCAPE)
-			mRunning = false;
 	}
 	catch (Exception e) {
 
@@ -141,12 +142,12 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 		_simulator->stepSimulation(evt.timeSinceLastFrame, 1, 1.0 / fps);
 	}
 	else {
-		// _gameManager->showGameOver();
-		// if(gameOverTime > 2000) {
+		_gameManager->showGameOver();
+		if(gameOverTime > 2000) {
 		// 	_gameManager->resetGameOver();
-		// 	_gameManager->hideGameOver();
-		// 	gameOverTime = 0.0f;
-		// }
+			_gameManager->hideGameOver();
+			gameOverTime = 0.0f;
+		}
 	}
 
 	// Constrains the laser's speed
@@ -168,7 +169,7 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 }
 
 // Called once per predefined frame
-void Application::update(const FrameEvent &evt) {
+bool Application::update(const FrameEvent &evt) {
 
 	static float dTime = t1->getMilliseconds();
 
@@ -190,6 +191,27 @@ void Application::update(const FrameEvent &evt) {
 			camMan->lookAt(_theSpaceship->getNode()->getPosition());
 		}
 	}
+	else if(lastKey == OIS::KC_ESCAPE)
+			mRunning = false;
+
+	switch(gameState) {
+		case HOME:
+			handleGUI(evt);
+			return true;
+			break;
+		case SINGLE:
+			// handleAi();
+			break;
+		case ENDGAME:
+			return true;
+			break;
+		// case REPLAY:
+		// 	replayData();
+		// 	break;
+		case HOWTO:
+			return true;
+			break;
+	}
 
 	if(cameras[camChange % cameras.size()]->getName() == "Spaceship Cam"){
 			_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
@@ -208,6 +230,7 @@ void Application::update(const FrameEvent &evt) {
 	}
 
 
+
 	// _camNode->setPosition(_theSpaceship->getNode()->getPosition());
 	// spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
 
@@ -215,37 +238,75 @@ void Application::update(const FrameEvent &evt) {
 	// int pull = 500;
 	// Ogre::Vector3 paddleAttract = (_theSpaceship->getNode()->getPosition() - _theBall->getNode()->getPosition()).normalisedCopy();
 	// int index = 0;
-	for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
-	{
-		if((*i)->alive){
-			(*i)->moveLaser();
+	for (int li = 0; li < lasers.size(); li++){
+		if(lasers[li]->alive){
+			lasers[li]->moveLaser();
 		}
 		else{
 			// Delete the laser 
-			Ogre::String entName = (*i)->getName();
-			(*i)->getNode()->detachAllObjects();
-			(*i)->getNode()->removeAndDestroyAllChildren();
+			Ogre::String entName = lasers[li]->getName();
+			lasers[li]->getNode()->detachAllObjects();
+			lasers[li]->getNode()->removeAndDestroyAllChildren();
 			mSceneManager->destroyEntity(entName);
 			mSceneManager->destroyEntity("Particle_"+entName);
-
+			lasers.erase(lasers.begin() + li);
+			li--;
 		}
 	}
+	// for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
+	// {
+	// 	if((*i)->alive){
+	// 		(*i)->moveLaser();
+	// 	}
+	// 	else{
+	// 		// Delete the laser 
+	// 		Ogre::String entName = (*i)->getName();
+	// 		(*i)->getNode()->detachAllObjects();
+	// 		(*i)->getNode()->removeAndDestroyAllChildren();
+	// 		mSceneManager->destroyEntity(entName);
+	// 		mSceneManager->destroyEntity("Particle_"+entName);
 
-	for (std::vector<Asteroid*>::iterator i = asteroids.begin(); i != asteroids.end(); ++i)
-	{
-		if((*i)->alive){
-			(*i)->moveAsteroid(_theSpaceship->getNode());
+	// 	}
+	// }
+
+	for (int ai = 0; ai < asteroids.size(); ai++){
+		if(asteroids[ai]->alive){
+			asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
 		}
 		else{
-			// Delete the asteroid
-			Ogre::String entName = (*i)->getName();
-			(*i)->getNode()->detachAllObjects();
-			// (*i)->getNode()->removeAndDestroyAllChildren();
+			// Delete the laser 
+			Ogre::String entName = asteroids[ai]->getName();
+			asteroids[ai]->getNode()->detachAllObjects();
+			// asteroids[ai]->getNode()->removeAndDestroyAllChildren();
 			mSceneManager->destroyEntity(entName);
 			// mSceneManager->destroyEntity("Particle_"+entName);
+			asteroids.erase(asteroids.begin() + ai);
+			ai--;
 		}
 	}
 
+	// for (std::vector<Asteroid*>::iterator i = asteroids.begin(); i != asteroids.end(); ++i)
+	// {
+	// 	if((*i)->alive){
+	// 		// (*i)->moveAsteroid(_theSpaceship->getNode());
+	// 	}
+	// 	else{
+	// 		// Delete the asteroid
+	// 		Ogre::String entName = (*i)->getName();
+	// 		(*i)->getNode()->detachAllObjects();
+	// 		// (*i)->getNode()->removeAndDestroyAllChildren();
+	// 		mSceneManager->destroyEntity(entName);
+	// 		// mSceneManager->destroyEntity("Particle_"+entName);
+	// 	}
+	// }
+
+	if(!_theSpaceship->alive){
+		setState(ENDGAME);
+		// Ogre::String entName = _theSpaceship->getName();
+		// _theSpaceship->getNode()->detachAllObjects();
+		// // _theSpaceship->getNode()->removeAndDestroyAllChildren();
+		// mSceneManager->destroyEntity(entName);
+	}
 
 	
 	// //Spawn new Asteroids
@@ -262,6 +323,24 @@ void Application::update(const FrameEvent &evt) {
 	// else{
 	// 	createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 	// }
+}
+
+bool Application::handleGUI(const FrameEvent &evt) {
+
+	if(!begin) {
+		_oisManager->capture();
+
+		OIS::KeyCode lastKey = _oisManager->lastKeyPressed();
+
+		if(lastKey == OIS::KC_ESCAPE) {
+			// close window when ESC is pressed
+			mRunning = false;
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 
@@ -511,20 +590,20 @@ void Application::setupCEGUI(void) {
 	CEGUI::Window *sheet = wmgr.createWindow("DefaultWindow", "_MasterRoot");
 	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(sheet);
 
-	// CEGUI::Window* quitButton = wmgr.createWindow("AlfiskoSkin/Button", "QuitButton");
-	// quitButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.0f, 0), CEGUI::UDim(0.0f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.05f, 0))));
-	// quitButton->setText("Quit");
+	CEGUI::Window* quitButton = wmgr.createWindow("AlfiskoSkin/Button", "QuitButton");
+	quitButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.0f, 0), CEGUI::UDim(0.0f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.05f, 0))));
+	quitButton->setText("Quit");
 
 	// ipWindow = wmgr.createWindow("AlfiskoSkin/Label", "ipWindow");
 	// ipWindow->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.92f, 0)),
 	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(1, 0))));
 	// ipWindow->setText(netManager->getIPstring());
 
-	// singlePlayerButton = wmgr.createWindow("AlfiskoSkin/Button", "SinglePlayerButton");
-	// singlePlayerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.35f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.4f, 0))));
-	// singlePlayerButton->setText("Single Player");
+	singlePlayerButton = wmgr.createWindow("AlfiskoSkin/Button", "SinglePlayerButton");
+	singlePlayerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.35f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.4f, 0))));
+	singlePlayerButton->setText("Single Player");
 
 	// hostServerButton = wmgr.createWindow("AlfiskoSkin/Button", "HostButton");
 	// hostServerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
@@ -545,49 +624,49 @@ void Application::setupCEGUI(void) {
 	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.55f, 0))));
 	// joinServerButton->setText("Join Game");
 
-	// howToButton = wmgr.createWindow("AlfiskoSkin/Button", "HowToButton");
-	// howToButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.3f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.35f, 0))));
-	// howToButton->setText("How To Play");
+	howToButton = wmgr.createWindow("AlfiskoSkin/Button", "HowToButton");
+	howToButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.3f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.35f, 0))));
+	howToButton->setText("How To Play");
 
-	// howToText = wmgr.createWindow("AlfiskoSkin/MultiLineEditbox", "Instructions");
-	// howToText->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.125f, 0), CEGUI::UDim(0.35f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.875f, 0), CEGUI::UDim(0.75f, 0))));
-	// howToText->setText(instructions);
-	// static_cast<CEGUI::MultiLineEditbox*>(howToText)->setReadOnly(true);
+	howToText = wmgr.createWindow("AlfiskoSkin/MultiLineEditbox", "Instructions");
+	howToText->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.125f, 0), CEGUI::UDim(0.35f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(0.875f, 0), CEGUI::UDim(0.75f, 0))));
+	howToText->setText(instructions);
+	static_cast<CEGUI::MultiLineEditbox*>(howToText)->setReadOnly(true);
 
-	// homeButton = wmgr.createWindow("AlfiskoSkin/Button", "HomeButton");
-	// homeButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.0f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(0.05f, 0))));
-	// homeButton->setText("Home");
+	homeButton = wmgr.createWindow("AlfiskoSkin/Button", "HomeButton");
+	homeButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.0f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(0.05f, 0))));
+	homeButton->setText("Home");
 
 	// replayButton = wmgr.createWindow("AlfiskoSkin/Button", "ReplayButton");
 	// replayButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
 	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.45f, 0))));
 	// replayButton->setText("Watch Replay");
 
-	// sheet->addChild(singlePlayerButton);
+	sheet->addChild(singlePlayerButton);
 	// sheet->addChild(hostServerButton);
 	// sheet->addChild(joinServerButton);
-	// sheet->addChild(quitButton);
+	sheet->addChild(quitButton);
 	// sheet->addChild(ipBox);
 	// sheet->addChild(ipText);
 	// sheet->addChild(ipWindow);
-	// sheet->addChild(homeButton);
+	sheet->addChild(homeButton);
 	// sheet->addChild(replayButton);
-	// sheet->addChild(howToButton);
-	// sheet->addChild(howToText);
+	sheet->addChild(howToButton);
+	sheet->addChild(howToText);
 
 	// replayButton->hide();
-	// howToText->hide();
+	howToText->hide();
 
-	// singlePlayerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartSinglePlayer, this));
+	singlePlayerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartSinglePlayer, this));
 	// hostServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartServer, this));
 	// joinServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::JoinServer, this));
-	// quitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Quit, this));
-	// homeButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Home, this));
+	quitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Quit, this));
+	homeButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Home, this));
 	// replayButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Replay, this));
-	// howToButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::HowTo, this));
+	howToButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::HowTo, this));
 
 }
 
@@ -637,6 +716,7 @@ void Application::setupGameManager(void) {
 	mRenderWindow->addListener(this);
 
 	_gameManager = new GameManager();
+	_gameManager->addRenderer(mRenderer);
 	_gameManager->startMusic();
 
 }
@@ -732,11 +812,95 @@ void Application::createObjects(void) {
 *CEGUI Button Callbacks 
 */
 
-// bool Application::StartSinglePlayer(const CEGUI::EventArgs &e) {
+bool Application::StartSinglePlayer(const CEGUI::EventArgs &e) {
 
-// 	begin = true;
-// 	setState(SINGLE);
+	begin = true;
+	setState(SINGLE);
 
-// 	gameManager->setServer(true);
-// 	return true;
-// }
+	// gameManager->setServer(true);
+	return true;
+}
+
+bool Application::Quit(const CEGUI::EventArgs& e) {
+
+	mRunning = false;
+    return true;
+}
+
+bool Application::Home(const CEGUI::EventArgs &e) {
+
+	setState(HOME);
+	return true;
+}
+
+bool Application::HowTo(const CEGUI::EventArgs &e) {
+	setState(HOWTO);
+	return true;
+}
+
+
+void Application::hideGui() {
+
+	singlePlayerButton->hide();
+	// hostServerButton->hide();
+	// joinServerButton->hide();
+	// ipBox->hide();
+	// ipText->hide();
+	// ipWindow->hide();
+	_gameManager->hideGameOver();
+	// replayButton->hide();
+	howToButton->hide();
+	howToText->hide();
+}
+
+void Application::showGui() {
+
+	singlePlayerButton->show();
+	// hostServerButton->show();
+	// joinServerButton->show();
+	// ipBox->show();
+	// ipText->show();
+	// ipWindow->show();
+	howToButton->show();
+}
+
+void Application::showEndGui() {
+	_gameManager->showGameOver();
+	// replayButton->show();
+}
+
+void Application::setState(State state) {
+
+	switch(state) {
+		case HOME:
+			// resetNetManager();
+			// states.clear();
+			hideGui();
+			showGui();
+			// gameManager->resetScore();
+			mRenderWindow->removeAllViewports();
+			mRenderWindow->addViewport(cameras[0]);
+			_theSpaceship->reset();
+			gameState = HOME;
+			break;
+		case SINGLE:
+			hideGui();
+			gameState = SINGLE;
+			break;
+		case ENDGAME:
+			hideGui();
+			showEndGui();
+			gameState = ENDGAME;
+			break;
+		case REPLAY:
+			// gameManager->resetScore();
+			hideGui();
+			gameState = REPLAY;
+			break;
+		case HOWTO:
+			hideGui();
+			gameState = HOWTO;
+			howToText->show();
+			break;
+	}
+}
