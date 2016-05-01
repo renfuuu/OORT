@@ -89,18 +89,11 @@ void Application::init()
     // std::cout << buffer.str().size();
 
 	
-    std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
-	XML_Mesh ms(meshfile);
+	// XML_Mesh* ms  = new XML_Mesh;
+ //  std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
 	
-	// ms.doc.Parse(buffer.str().c_str());
-
-	if(ms.doc.Error())
-		ms.doc.PrintError();
-	else
-		std::cout << "Loading complete" << std::endl;
-
-	ms.run();
-
+	// ms->loadFromXMLFile(meshfile);
+	// ms->toFile("savedmesh1.xml")
 }
 
 
