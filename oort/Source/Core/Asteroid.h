@@ -10,7 +10,7 @@ public:
 	bool hitWall;
 	Ogre::Real velocity;
 
-	bool alive;
+	// bool alive;
 
 	virtual void update();
 	void moveAsteroid(Ogre::SceneNode* ssNode);

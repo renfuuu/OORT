@@ -137,3 +137,8 @@ void GameObject::showColliderBox() {
 	box->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY);
 	sceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(box);
 }
+
+void GameObject::setStatus(bool status)
+{
+	alive = status;
+}

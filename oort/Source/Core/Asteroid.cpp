@@ -13,12 +13,13 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	// Gets the radius of the Ogre::Entity sphere
 	kinematic = true;
 
-	shape = new btSphereShape((ent->getBoundingBox().getSize().x)*scale*.75);
+	shape = new btSphereShape((ent->getBoundingRadius()*1.2)*scale);
+	// shape = new btSphereShape((ent->getBoundingBox().getSize().x)*scale);
 
 	// auto var = ent->getBoundingBox();
 
 	// // Bullet uses half margins for collider
-	// auto size = var.getSize()/2;
+	// auto size = var.getSize()*.9;
 
 	// shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
 
@@ -57,11 +58,17 @@ void Asteroid::update() {
 			}
 			if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
-				// std::cout << context->getTheObject()->getName() << " hit: " << name << std::endl;
+				std::cout << context->getTheObject()->getName() << " hit " << name << std::endl;
+				context->getTheObject()->setStatus(false);
+				simulator->removeObject(context->getTheObject());
+				simulator->removeObject(this);
 			}
 			if( context->getTheObject()->getType() == GameObject::SPACESHIP_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
-				// std::cout << "Spaceship hit: " << name << std::endl;
+				context->getTheObject()->setStatus(false);
+				simulator->removeObject(this);
+				simulator->removeObject(context->getTheObject());
+				std::cout << "Spaceship hit: " << name << std::endl;
 			}
 
 		}
