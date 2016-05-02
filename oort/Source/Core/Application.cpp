@@ -89,11 +89,11 @@ void Application::init()
     // std::cout << buffer.str().size();
 
 	
-	// XML_Mesh* ms  = new XML_Mesh;
- //  std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
+	XML_Mesh* ms  = new XML_Mesh;
+  std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
 	
-	// ms->loadFromXMLFile(meshfile);
-	// ms->toFile("savedmesh1.xml")
+	ms->loadFromXMLFile(meshfile);
+	ms->toFile("savedmesh1.xml");
 }
 
 
@@ -688,10 +688,10 @@ void Application::createObjects(void) {
 		Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
 
 		if(asteroidCount % 2 == 0){
-			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "stone1.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 		}
-		else
-			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+		// else
+			// createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 
 	}
 
