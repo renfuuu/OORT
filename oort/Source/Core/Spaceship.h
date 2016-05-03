@@ -19,7 +19,6 @@ public:
 	Ogre::Degree rollAngle;
 
 	bool hitWall;
-	// bool alive;
 
 	OgreBites::SdkCameraMan* getCamera();
 

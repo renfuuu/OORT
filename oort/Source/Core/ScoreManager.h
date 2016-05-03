@@ -18,6 +18,7 @@ public:
  	void addRenderer(CEGUI::OgreRenderer*);
  	void postScore(void);
  	void postHighScore(void);
+ 	void postLives(void);
  	void scorePoints(int);
  	void nonFloorHit(void);
  	bool floorHit(void);
@@ -28,6 +29,9 @@ public:
 	void resetGameOver();
 	void showGameOver();
 	void hideGameOver();
+	int getLives();
+	void loseALife();
+	// void updateLives(Spaceship* ss);
 
 protected:
 
@@ -37,7 +41,9 @@ protected:
 
 	// Score Data
  	int gameScore;
+ 	int gameLives;
  	int highScore;
+ 	int lives;
  	int floorHitCount;
  	bool gameOverB;
 
@@ -49,6 +55,8 @@ protected:
 	Ogre::String scoreLabel;
 	std::string highScoreText;
 	Ogre::String highScoreLabel;
+	// Ogre::String livesLabel;
+	std::string livesText;
 	// Ogre::String gameOverText;
 	// Ogre::String gameOverLabel;
 	std::fstream highScoreFile;
@@ -58,4 +66,5 @@ protected:
     CEGUI::Window* opponentScoreboard;
     CEGUI::Window* youWinBoard;
     CEGUI::Window* youLoseBoard;
+    CEGUI::Window* livesBoard;
 };

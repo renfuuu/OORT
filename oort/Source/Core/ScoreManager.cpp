@@ -1,6 +1,6 @@
 #include "ScoreManager.h"
 
-ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), gameOverB(false), scoreLabel("SCORE_"), scoreText("Score: "), highScoreLabel("HIGH_SCORE_"), highScoreText("High Score: ") {
+ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), lives(5), gameOverB(false), scoreLabel("SCORE_"), scoreText("Score: "), highScoreLabel("HIGH_SCORE_"), highScoreText("High Score: "), livesText("Lives: ") {
 	/* The global timer */
 	timer = new Ogre::Timer();
 	dt = timer->getMilliseconds();
@@ -33,10 +33,10 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 	CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
 	CEGUI::Window *sheet = CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow(); 
 
-	// gameScoreboard = wmgr.createWindow("AlfiskoSkin/Label", "Red");
-	// gameScoreboard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.0f, 0), CEGUI::UDim(0.92f, 0)),
-	// CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(1, 0))));
-	// gameScoreboard->setText("Red: 0");
+	gameScoreboard = wmgr.createWindow("AlfiskoSkin/Label", "Points");
+	gameScoreboard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.0f, 0), CEGUI::UDim(0.92f, 0)),
+	CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(1, 0))));
+	gameScoreboard->setText("Points: 0");
 
 	// opponentScoreboard = wmgr.createWindow("AlfiskoSkin/Label", "Blue");
 	// opponentScoreboard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.8f, 0), CEGUI::UDim(0.92f, 0)),
@@ -59,7 +59,13 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 	youLoseBoard->setMouseCursor("AlfiskoSkin/MouseArrow");
 	youLoseBoard->hide();
 
-	// sheet->addChild(gameScoreboard);
+	livesBoard = wmgr.createWindow("AlfiskoSkin/Label", "Lives");
+	livesBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.8f, 0), CEGUI::UDim(0.92f, 0)),
+		CEGUI::UVector2(CEGUI::UDim(1, 0), CEGUI::UDim(1, 0))));
+	livesBoard->setText("Lives: 5");
+
+	sheet->addChild(gameScoreboard);
+	sheet->addChild(livesBoard);
 	// sheet->addChild(opponentScoreboard);
 	sheet->addChild(youWinBoard);
 	sheet->addChild(youLoseBoard);
@@ -83,7 +89,7 @@ Ogre::Real ScoreManager::getTime() {
 void ScoreManager::postScore(void) {
 	// scoreOverlay->showOverlay();
 	// scoreOverlay->setText(scoreText + std::to_string(gameScore));
-	// gameScoreboard->setText(scoreText + std::to_string(gameScore));
+	gameScoreboard->setText(scoreText + std::to_string(gameScore));
 	// opponentScoreboard->setText(enemyScoreText + std::to_string(enemyScore));
 
 }
@@ -93,11 +99,14 @@ void ScoreManager::postHighScore(void) {
 	// highScoreOverlay->setText(highScoreText + std::to_string(highScore));
 }
 
+void ScoreManager::postLives(void){
+	livesBoard->setText(livesText + std::to_string(lives));
+}
 
 void ScoreManager::scorePoints(int points) {
-	// gameScore += points;
+	gameScore += points;
 	// nonFloorHit();
-	// postScore();
+	postScore();
 }
 
 
@@ -122,8 +131,10 @@ void ScoreManager::resetScore(void) {
 	// 	postHighScore();
 	// }
 	// floorHitCount = 0;
-	// gameScore = 0;
-	// postScore();
+	gameScore = 0;
+	lives = 5;
+	postScore();
+	postLives();
 }
 
 bool ScoreManager::isGameOver() {
@@ -150,8 +161,8 @@ void ScoreManager::hideGameOver() {
 void ScoreManager::gameOver() {
 	gameOverB = true;
 	// gameOverOverlay->setText(gameOverText);
-	showGameOver();
-	// resetScore();
+	// showGameOver();
+	resetScore();
 }
 
 void ScoreManager::writeScore() {
@@ -159,4 +170,13 @@ void ScoreManager::writeScore() {
 	// highScoreFile.open("highscore.txt", std::ios::out);
 	// highScoreFile << std::to_string(highScore) + "\n";
 	// highScoreFile.close();
+}
+
+int ScoreManager::getLives(){
+	return lives;
+}
+
+void ScoreManager::loseALife(){
+	lives--;
+	postLives();
 }

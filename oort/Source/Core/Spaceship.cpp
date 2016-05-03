@@ -157,4 +157,3 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 	updateTransform();
 }
-

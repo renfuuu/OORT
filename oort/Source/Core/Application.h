@@ -49,7 +49,7 @@ public:
 
 	virtual void init();
 
-	enum State{ HOME, SINGLE, SERVER, CLIENT, ENDGAME, REPLAY, HOWTO };
+	enum State{ HOME, SINGLE, ENDGAME, REPLAY, HOWTO };
 	State gameState = HOME;
 
 	Ogre::Root * mRoot;
@@ -110,7 +110,8 @@ public:
 	Wall* createWall(Ogre::String nme, GameObject::objectType tp, std::string type, int width, int height, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	Laser* createLaser(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, GameObject* sship, Ogre::Vector3 scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	Asteroid* createAsteroid(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
-
+	void generateAsteroids(int);
+	void clearAsteroids();
 
 	void setupWindowRendererSystem(void);
 	void setupResources(void);
