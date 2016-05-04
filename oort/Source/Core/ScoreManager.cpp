@@ -41,7 +41,7 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 	highscoreBoard = wmgr.createWindow("AlfiskoSkin/Label", "HighScore");
 	highscoreBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.35f, 0), CEGUI::UDim(0.92f, 0)),
 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(1, 0))));
-	highscoreBoard->setText("High Score: 0");
+	highscoreBoard->setText("High Score: " + std::to_string(highScore));
 
 	youWinBoard = wmgr.createWindow("AlfiskoSkin/Editbox", "YouWinBoard");
 	youWinBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.42f, 0), CEGUI::UDim(0.33f, 0)),

@@ -20,7 +20,7 @@ using namespace Ogre;
 
 std::string instructions = "* Press C - change the cameras\n* Press M - mute music\n* Press ESC to quit the game\n* Press W & S control the pitch of the Spaceship\n* Press A & D control the yaw  of the Spaceship\n* Press Q & E control the roll of the Spaceship\n* Press left mouse button to fire laser\n* Press Mouse Scroll to throttle up and down the Spaceship's trust to move it along it's current trajectory";
 
-#define MIN_NUM_ASTEROIDS 20
+#define MIN_NUM_ASTEROIDS 6
 
 Application::Application():
 	camChange(0),
@@ -869,7 +869,6 @@ void Application::createObjects(void) {
 
 bool Application::StartSinglePlayer(const CEGUI::EventArgs &e) {
 
-	std::cout << "Start Single Player pressed" << std::endl;
 	begin = true;
 	setState(SINGLE);
 
