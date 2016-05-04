@@ -1,11 +1,31 @@
 #pragma once
 
 #include "GameObject.h"
-#include "tinyxml2.h"
 #include <string>
 #include <cstdlib>
+#include <vector>
+
+#include "tinyxml2.h"
 
 using namespace tinyxml2;
+
+struct vec2f
+{
+	float u;
+	float v;
+	vec2f(float u_, float v_):
+		u(u_), 
+		v(v_)
+	{}
+
+  ~vec2f(){}
+  
+  vec2f(float a=0.0f)
+  {
+    u=a;
+    v=a;
+  }
+};
 
 struct vec3f
 {
@@ -16,9 +36,44 @@ struct vec3f
 		x(x_), 
 		y(y_), 
 		z(z_)
-	{
+	{}
 
+	vec3f(Ogre::Vector3 v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
 	}
+  
+  vec3f(float a = 0.0f)
+  {
+    x = a;
+    y = a;
+    z = a;
+  }
+
+  ~vec3f(){}
+};
+
+struct vec3d
+{
+	double x;
+	double y;
+	double z;
+	vec3d(double x_, double y_, double z_):
+		x(x_), 
+		y(y_), 
+		z(z_)
+	{}
+  
+  vec3d(double a = 0.0f)
+  {
+    x = a;
+    y = a;
+    z = a;
+  }
+
+  ~vec3d(){}
 };
 
 struct vec3i
@@ -30,55 +85,114 @@ struct vec3i
 		x(x_), 
 		y(y_), 
 		z(z_)
-	{
-
-	}
+	{}
+  
+  ~vec3i(){}
 };
 
+struct Triangle
+{
+	std::vector<vec3f> verts;
+	std::vector<int> indices;
+	Triangle(vec3f p0, int i0, vec3f p1, int i1, vec3f p2, int i2)
+	{
+		verts.push_back(p0);
+		verts.push_back(p1);
+		verts.push_back(p2);
+
+		indices.push_back(i0);
+		indices.push_back(i1); 
+		indices.push_back(i2);
 
 
+	}
+
+  	vec3f& operator[](unsigned int i)
+  	{
+  		return verts[i];
+  	}
+	const vec3f& operator[](unsigned int i)const
+	{ 
+		return verts[i];
+	}
+
+	int getIndex(unsigned int i)
+	{
+		return indices[i];
+	}
+
+	void setIndex(unsigned int i, int val)
+	{
+		indices[i] = val;
+	}
+
+  ~Triangle(){}
+};
 
 struct XML_Mesh
 {
-	XMLDocument doc;
+	XMLDocument* doc;
 
 	std::vector<vec3f> verts;
  	std::vector<vec3i> faces;
+ 	std::vector<vec3f> normals;
+ 	std::vector<vec2f> texcoords;
 
- 	XMLNode* xmlRoot;
+ 	// XMLElement* xmlRoot;
 
- 	XMLNode* xmlVertexBuffer;
- 	XMLNode* xmlFaceBuffer;
+ 	// XMLElement* xmlVertexBuffer;
+ 	// XMLElement* xmlFaceBuffer;
 
- 	std::vector<XMLNode*> xmlVerts;
- 	std::vector<XMLNode*> xmlFaces;
+ 	// std::vector<XMLElement> xmlVerts;
+ 	// std::vector<XMLElement> xmlFaces;
 
 
  	std::string path;
+  XML_Mesh();
+ 	XML_Mesh(std::string name);
+ 	XML_Mesh(std::vector<vec3f> v, std::vector<vec3i> i);
 
- 	XML_Mesh();
- 	XML_Mesh(std::string m);
+  ~XML_Mesh()
+   {}
+   
+ 	void toFile(std::string filename);
+ 	void loadFromXMLFile(std::string filename);
+/*
+	void addVertex(vec3f pos, vec3f norm, vec2f uv);
+	bool addFace(int a, int b, int c);
+*/
 
- 	~XML_Mesh();
- 	void toFile();
- 	void load();
-	void run();
 };
 
 
-class MeshSlicer{
+class MeshSlicer
+{
+	XML_Mesh* mHost;
+	Ogre::SceneNode* mSceneNode;
 
 public:
 
-	MeshSlicer();
+
+
+	MeshSlicer(Ogre::SceneNode* node);
 	~MeshSlicer();
+
+	void sliceByPlane(std::vector<XML_Mesh*>& meshHalves, vec3f planepoint, vec3f planenormal);
+	void loadMesh(XML_Mesh* mesh);
+	private:
+	int ClipFacet(Triangle in, 
+		std::vector<vec3f>* addedPoints, 
+		std::vector<Triangle>* preserved, 
+		std::vector<Triangle>* clipped, 
+		vec3f n, 
+		vec3f p0);
 
 };
 
 
 /*-------------------------------------------------------------------------
    Clip a 3 vertex facet in place
-   The 3 point facet is defined by vertices p[0],p[1],p[2], "p[3]"
+   The 3 point facet is defined by vertices t1[0],t1[1],t1[2], "t1[3]"
       There must be a fourth point as a 4 point facet may result
    The normal to the plane is n
    A point on the plane is p0
@@ -86,119 +200,3 @@ public:
    Return the number of vertices in the clipped polygon
 */
 
-// int ClipFacet(XYZ *p,XYZ n,XYZ p0)
-// {
-//    double A,B,C,D;
-//    double l;
-//    double side[3];
-//    XYZ q;
-
-//    /*
-//       Determine the equation of the plane as
-//       Ax + By + Cz + D = 0
-//    */
-//    l = sqrt(n.x*n.x + n.y*n.y + n.z*n.z);
-//    A = n.x / l;
-//    B = n.y / l;
-//    C = n.z / l;
-//    D = -(n.x*p0.x + n.y*p0.y + n.z*p0.z);
-
-//    /*
-//       Evaluate the equation of the plane for each vertex
-//       If side < 0 then it is on the side to be retained
-//       else it is to be clippped
-//    */
-//    side[0] = A*p[0].x + B*p[0].y + C*p[0].z + D;
-//    side[1] = A*p[1].x + B*p[1].y + C*p[1].z + D;
-//    side[2] = A*p[2].x + B*p[2].y + C*p[2].z + D;
-
-//    /* Are all the vertices are on the clipped side */
-//    if (side[0] >= 0 && side[1] >= 0 && side[2] >= 0)
-//       return(0);
-
-//    /* Are all the vertices on the not-clipped side */
-//    if (side[0] <= 0 && side[1] <= 0 && side[2] <= 0)
-//       return(3);
-
-//    /* Is p0 the only point on the clipped side */
-//    if (side[0] > 0 && side[1] < 0 && side[2] < 0) {
-//       q.x = p[0].x - side[0] * (p[2].x - p[0].x) / (side[2] - side[0]);
-//       q.y = p[0].y - side[0] * (p[2].y - p[0].y) / (side[2] - side[0]);
-//       q.z = p[0].z - side[0] * (p[2].z - p[0].z) / (side[2] - side[0]);
-//       p[3] = q;
-//       q.x = p[0].x - side[0] * (p[1].x - p[0].x) / (side[1] - side[0]);
-//       q.y = p[0].y - side[0] * (p[1].y - p[0].y) / (side[1] - side[0]);
-//       q.z = p[0].z - side[0] * (p[1].z - p[0].z) / (side[1] - side[0]);
-//       p[0] = q;
-//       return(4);
-//    }
-
-//    /* Is p1 the only point on the clipped side */
-//    if (side[1] > 0 && side[0] < 0 && side[2] < 0) {
-//       p[3] = p[2];
-//       q.x = p[1].x - side[1] * (p[2].x - p[1].x) / (side[2] - side[1]);
-//       q.y = p[1].y - side[1] * (p[2].y - p[1].y) / (side[2] - side[1]);
-//       q.z = p[1].z - side[1] * (p[2].z - p[1].z) / (side[2] - side[1]);
-//       p[2] = q;
-//       q.x = p[1].x - side[1] * (p[0].x - p[1].x) / (side[0] - side[1]);
-//       q.y = p[1].y - side[1] * (p[0].y - p[1].y) / (side[0] - side[1]);
-//       q.z = p[1].z - side[1] * (p[0].z - p[1].z) / (side[0] - side[1]);
-//       p[1] = q;
-//       return(4);
-//    }
-
-//    /* Is p2 the only point on the clipped side */
-//    if (side[2] > 0 && side[0] < 0 && side[1] < 0) {
-//       q.x = p[2].x - side[2] * (p[0].x - p[2].x) / (side[0] - side[2]);
-//       q.y = p[2].y - side[2] * (p[0].y - p[2].y) / (side[0] - side[2]);
-//       q.z = p[2].z - side[2] * (p[0].z - p[2].z) / (side[0] - side[2]);
-//       p[3] = q;
-//       q.x = p[2].x - side[2] * (p[1].x - p[2].x) / (side[1] - side[2]);
-//       q.y = p[2].y - side[2] * (p[1].y - p[2].y) / (side[1] - side[2]);
-//       q.z = p[2].z - side[2] * (p[1].z - p[2].z) / (side[1] - side[2]);
-//       p[2] = q;
-//       return(4);
-//    }
-
-//    /* Is p0 the only point on the not-clipped side */
-//    if (side[0] < 0 && side[1] > 0 && side[2] > 0) {
-//       q.x = p[0].x - side[0] * (p[1].x - p[0].x) / (side[1] - side[0]);
-//       q.y = p[0].y - side[0] * (p[1].y - p[0].y) / (side[1] - side[0]);
-//       q.z = p[0].z - side[0] * (p[1].z - p[0].z) / (side[1] - side[0]);
-//       p[1] = q;
-//       q.x = p[0].x - side[0] * (p[2].x - p[0].x) / (side[2] - side[0]);
-//       q.y = p[0].y - side[0] * (p[2].y - p[0].y) / (side[2] - side[0]);
-//       q.z = p[0].z - side[0] * (p[2].z - p[0].z) / (side[2] - side[0]);
-//       p[2] = q;
-//       return(3);
-//    }
-
-//    /* Is p1 the only point on the not-clipped side */
-//    if (side[1] < 0 && side[0] > 0 && side[2] > 0) {
-//       q.x = p[1].x - side[1] * (p[0].x - p[1].x) / (side[0] - side[1]);
-//       q.y = p[1].y - side[1] * (p[0].y - p[1].y) / (side[0] - side[1]);
-//       q.z = p[1].z - side[1] * (p[0].z - p[1].z) / (side[0] - side[1]);
-//       p[0] = q;
-//       q.x = p[1].x - side[1] * (p[2].x - p[1].x) / (side[2] - side[1]);
-//       q.y = p[1].y - side[1] * (p[2].y - p[1].y) / (side[2] - side[1]);
-//       q.z = p[1].z - side[1] * (p[2].z - p[1].z) / (side[2] - side[1]);
-//       p[2] = q;
-//       return(3);
-//    }
-
-//    /* Is p2 the only point on the not-clipped side */
-//    if (side[2] < 0 && side[0] > 0 && side[1] > 0) {
-//       q.x = p[2].x - side[2] * (p[1].x - p[2].x) / (side[1] - side[2]);
-//       q.y = p[2].y - side[2] * (p[1].y - p[2].y) / (side[1] - side[2]);
-//       q.z = p[2].z - side[2] * (p[1].z - p[2].z) / (side[1] - side[2]);
-//       p[1] = q;
-//       q.x = p[2].x - side[2] * (p[0].x - p[2].x) / (side[0] - side[2]);
-//       q.y = p[2].y - side[2] * (p[0].y - p[2].y) / (side[0] - side[2]);
-//       q.z = p[2].z - side[2] * (p[0].z - p[2].z) / (side[0] - side[2]);
-//       p[0] = q;
-//       return(3);
-//    }
-
-//    /* Shouldn't get here */
-//    return(-1);
-// }

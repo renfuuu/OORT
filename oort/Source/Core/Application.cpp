@@ -14,7 +14,6 @@
 #include "OgreMotionState.h"
 #include "Simulator.h"
 #include "GameObject.h"
-#include "MeshSlicer.h"
 
 using namespace Ogre;
 
@@ -93,19 +92,20 @@ void Application::init()
 
     // std::cout << buffer.str().size();
 
+	mSlicer = new MeshSlicer(NULL);
 	
-    std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
-	XML_Mesh ms(meshfile);
+	XML_Mesh* ms  = new XML_Mesh;
+	std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
 	
-	// ms.doc.Parse(buffer.str().c_str());
+	ms->loadFromXMLFile(meshfile);
+	ms->toFile("savedmesh1");
 
-	if(ms.doc.Error())
-		ms.doc.PrintError();
-	else
-		std::cout << "Loading complete" << std::endl;
+	mSlicer->loadMesh(ms);
+	std::vector<XML_Mesh*> meshes;
+	mSlicer->sliceByPlane(meshes, vec3f(0.0f,0.0f,0.0f), vec3f(0.0f, 0.0f, 1.0f));
 
-	ms.run();
 
+	meshes[0]->toFile("slicedsavedmesh1");
 }
 
 
@@ -282,7 +282,7 @@ bool Application::update(const FrameEvent &evt) {
 
 	for (int ai = 0; ai < asteroids.size(); ai++){
 		if(asteroids[ai]->alive){
-			asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
+			// asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
 		}
 		else{
 			// Delete the laser 
@@ -836,6 +836,7 @@ void Application::createObjects(void) {
 	createWall("rightwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 
 	generateAsteroids(MIN_NUM_ASTEROIDS);
+
 
 	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
 	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);

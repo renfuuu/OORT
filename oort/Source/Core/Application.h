@@ -39,6 +39,8 @@
 #include "Wall.h"
 #include "Laser.h"
 #include "Asteroid.h"
+#include "MeshSlicer.h"
+
 
 
 class Application : public Ogre::FrameListener, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
@@ -87,6 +89,9 @@ public:
 	std::vector<Ogre::Camera*> cameras;
 	std::vector<Laser*> lasers;
 	std::vector<Asteroid*> asteroids;
+
+	MeshSlicer* mSlicer;
+
 
 	int points;
 	int width;
