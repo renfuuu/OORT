@@ -14,7 +14,6 @@
 #include "OgreMotionState.h"
 #include "Simulator.h"
 #include "GameObject.h"
-#include "MeshSlicer.h"
 
 using namespace Ogre;
 
@@ -91,12 +90,20 @@ void Application::init()
 
     // std::cout << buffer.str().size();
 
+	mSlicer = new MeshSlicer(NULL);
 	
 	XML_Mesh* ms  = new XML_Mesh;
-  std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
+	std::string meshfile = "../Assets/Asteroid/Stone_01.mesh.xml";
 	
 	ms->loadFromXMLFile(meshfile);
-	ms->toFile("savedmesh1.xml");
+	ms->toFile("savedmesh1");
+
+	mSlicer->loadMesh(ms);
+	std::vector<XML_Mesh*> meshes;
+	mSlicer->sliceByPlane(meshes, vec3f(0.0f,0.0f,0.0f), vec3f(0.0f, 0.0f, 1.0f));
+
+
+	meshes[0]->toFile("slicedsavedmesh1");
 }
 
 
@@ -264,7 +271,7 @@ bool Application::update(const FrameEvent &evt) {
 
 	for (int ai = 0; ai < asteroids.size(); ai++){
 		if(asteroids[ai]->alive){
-			asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
+			// asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
 		}
 		else{
 			// Delete the laser 
@@ -768,10 +775,10 @@ void Application::createObjects(void) {
 		Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
 
 		if(asteroidCount % 2 == 0){
-			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "stone1.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "slicedsavedmesh1", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 		}
-		// else
-			// createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+		else
+			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 
 	}
 

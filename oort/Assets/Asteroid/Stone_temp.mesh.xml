@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mesh>
+    <sharedgeometry vertexcount="0">
+        <vertexbuffer positions="true" texture_coords="1" colours_diffuse="False" normals="true">
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="StonesMat_01" operationtype="triangle_list" use32bitindexes="False" usesharedvertices="true">
+            <faces count="0">
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submesh index="0" name="StonesMat_01">
+        </submesh>
+    </submeshnames>
+</mesh>

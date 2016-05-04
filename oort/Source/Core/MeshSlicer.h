@@ -37,6 +37,13 @@ struct vec3f
 		y(y_), 
 		z(z_)
 	{}
+
+	vec3f(Ogre::Vector3 v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+	}
   
   vec3f(float a = 0.0f)
   {
@@ -46,6 +53,27 @@ struct vec3f
   }
 
   ~vec3f(){}
+};
+
+struct vec3d
+{
+	double x;
+	double y;
+	double z;
+	vec3d(double x_, double y_, double z_):
+		x(x_), 
+		y(y_), 
+		z(z_)
+	{}
+  
+  vec3d(double a = 0.0f)
+  {
+    x = a;
+    y = a;
+    z = a;
+  }
+
+  ~vec3d(){}
 };
 
 struct vec3i
@@ -62,6 +90,44 @@ struct vec3i
   ~vec3i(){}
 };
 
+struct Triangle
+{
+	std::vector<vec3f> verts;
+	std::vector<int> indices;
+	Triangle(vec3f p0, int i0, vec3f p1, int i1, vec3f p2, int i2)
+	{
+		verts.push_back(p0);
+		verts.push_back(p1);
+		verts.push_back(p2);
+
+		indices.push_back(i0);
+		indices.push_back(i1); 
+		indices.push_back(i2);
+
+
+	}
+
+  	vec3f& operator[](unsigned int i)
+  	{
+  		return verts[i];
+  	}
+	const vec3f& operator[](unsigned int i)const
+	{ 
+		return verts[i];
+	}
+
+	int getIndex(unsigned int i)
+	{
+		return indices[i];
+	}
+
+	void setIndex(unsigned int i, int val)
+	{
+		indices[i] = val;
+	}
+
+  ~Triangle(){}
+};
 
 struct XML_Mesh
 {
@@ -84,6 +150,7 @@ struct XML_Mesh
  	std::string path;
   XML_Mesh();
  	XML_Mesh(std::string name);
+ 	XML_Mesh(std::vector<vec3f> v, std::vector<vec3i> i);
 
   ~XML_Mesh()
    {}
@@ -100,16 +167,25 @@ struct XML_Mesh
 
 class MeshSlicer
 {
-	XML_Mesh* host;
+	XML_Mesh* mHost;
+	Ogre::SceneNode* mSceneNode;
 
 public:
 
 
 
-	MeshSlicer(XML_Mesh* mesh, Ogre::SceneNode* node);
+	MeshSlicer(Ogre::SceneNode* node);
 	~MeshSlicer();
 
-	void sliceByPlane(std::vector<XML_Mesh*> meshHalves, Ogre::Vector3 planepoint, Ogre::Vector3 planenormal);
+	void sliceByPlane(std::vector<XML_Mesh*>& meshHalves, vec3f planepoint, vec3f planenormal);
+	void loadMesh(XML_Mesh* mesh);
+	private:
+	int ClipFacet(Triangle in, 
+		std::vector<vec3f>* addedPoints, 
+		std::vector<Triangle>* preserved, 
+		std::vector<Triangle>* clipped, 
+		vec3f n, 
+		vec3f p0);
 
 };
 
@@ -124,133 +200,3 @@ public:
    Return the number of vertices in the clipped polygon
 */
 
-// int ClipFacet(std::vector<vec3f> inTri, std::vector<vec3f> outTri1, std::vector<vec3f> outTri2, vec3f n, vec3f p0){
-//    double A,B,C,D;
-//    double l;
-//    double side[3];
-//    vec3f q;
-
-//    /*
-//       Determine the equation of the plane as
-//       Ax + By + Cz + D = 0
-//    */
-//    l = sqrt(n.x*n.x + n.y*n.y + n.z*n.z);
-//    A = n.x / l;
-//    B = n.y / l;
-//    C = n.z / l;
-//    D = -(n.x*p0.x + n.y*p0.y + n.z*p0.z);
-
-//    /*
-//       Evaluate the equation of the plane for each vertex
-//       If side < 0 then it is on the side to be retained
-//       else it is to be clippped
-//    */
-//    side[0] = A*inTri[0].x + B*inTri[0].y + C*inTri[0].z + D;
-//    side[1] = A*inTri[1].x + B*inTri[1].y + C*inTri[1].z + D;
-//    side[2] = A*inTri[2].x + B*inTri[2].y + C*inTri[2].z + D;
-
-
-//    //CASE 0
-//    /* Are all the vertices are on the clipped side */
-//    if (side[0] >= 0 && side[1] >= 0 && side[2] >= 0)
-//    {
-//       outTri2.push_back(inTri);
-//       return(0);
-//    }
-
-//    //CASE 1
-//    /* Are all the vertices on the not-clipped side */
-//    if (side[0] <= 0 && side[1] <= 0 && side[2] <= 0)
-//    {
-//       outTri1.push_back(inTri);
-//       return(3);
-//    }
-//    //CASE 2
-//    /* Is p0 the only point on the clipped side */
-//    if (side[0] > 0 && side[1] < 0 && side[2] < 0) {
-
-//       q.x = inTri[0].x - side[0] * (inTri[2].x - inTri[0].x) / (side[2] - side[0]);
-//       q.y = inTri[0].y - side[0] * (inTri[2].y - inTri[0].y) / (side[2] - side[0]);
-//       q.z = inTri[0].z - side[0] * (inTri[2].z - inTri[0].z) / (side[2] - side[0]);
-//       vec3f p4 = q;
-//       q.x = inTri[0].x - side[0] * (inTri[1].x - inTri[0].x) / (side[1] - side[0]);
-//       q.y = inTri[0].y - side[0] * (inTri[1].y - inTri[0].y) / (side[1] - side[0]);
-//       q.z = inTri[0].z - side[0] * (inTri[1].z - inTri[0].z) / (side[1] - side[0]);
-//       vec3f p0 = q;
-
-//       outTri1.push_back(vec3f(p0, ))
-
-
-
-//       return(4);
-//    }
-//    //CASE 3
-//    /* Is p1 the only point on the clipped side */
-//    if (side[1] > 0 && side[0] < 0 && side[2] < 0) {
-//       inTri[3] = inTri[2];
-//       q.x = inTri[1].x - side[1] * (inTri[2].x - inTri[1].x) / (side[2] - side[1]);
-//       q.y = inTri[1].y - side[1] * (inTri[2].y - inTri[1].y) / (side[2] - side[1]);
-//       q.z = inTri[1].z - side[1] * (inTri[2].z - inTri[1].z) / (side[2] - side[1]);
-//       inTri[2] = q;
-//       q.x = inTri[1].x - side[1] * (inTri[0].x - inTri[1].x) / (side[0] - side[1]);
-//       q.y = inTri[1].y - side[1] * (inTri[0].y - inTri[1].y) / (side[0] - side[1]);
-//       q.z = inTri[1].z - side[1] * (inTri[0].z - inTri[1].z) / (side[0] - side[1]);
-//       inTri[1] = q;
-//       return(4);
-//    }
-//    //CASE 4
-//    /* Is p2 the only point on the clipped side */
-//    if (side[2] > 0 && side[0] < 0 && side[1] < 0) {
-//       q.x = inTri[2].x - side[2] * (inTri[0].x - inTri[2].x) / (side[0] - side[2]);
-//       q.y = inTri[2].y - side[2] * (inTri[0].y - inTri[2].y) / (side[0] - side[2]);
-//       q.z = inTri[2].z - side[2] * (inTri[0].z - inTri[2].z) / (side[0] - side[2]);
-//       inTri[3] = q;
-//       q.x = inTri[2].x - side[2] * (inTri[1].x - inTri[2].x) / (side[1] - side[2]);
-//       q.y = inTri[2].y - side[2] * (inTri[1].y - inTri[2].y) / (side[1] - side[2]);
-//       q.z = inTri[2].z - side[2] * (inTri[1].z - inTri[2].z) / (side[1] - side[2]);
-//       inTri[2] = q;
-//       return(4);
-//    }
-//    //CASE 5
-//    /* Is p0 the only point on the not-clipped side */
-//    if (side[0] < 0 && side[1] > 0 && side[2] > 0) {
-//       q.x = inTri[0].x - side[0] * (inTri[1].x - inTri[0].x) / (side[1] - side[0]);
-//       q.y = inTri[0].y - side[0] * (inTri[1].y - inTri[0].y) / (side[1] - side[0]);
-//       q.z = inTri[0].z - side[0] * (inTri[1].z - inTri[0].z) / (side[1] - side[0]);
-//       inTri[1] = q;
-//       q.x = inTri[0].x - side[0] * (inTri[2].x - inTri[0].x) / (side[2] - side[0]);
-//       q.y = inTri[0].y - side[0] * (inTri[2].y - inTri[0].y) / (side[2] - side[0]);
-//       q.z = inTri[0].z - side[0] * (inTri[2].z - inTri[0].z) / (side[2] - side[0]);
-//       inTri[2] = q;
-//       return(3);
-//    }
-//    //CASE 6 
-//    /* Is p1 the only point on the not-clipped side */
-//    if (side[1] < 0 && side[0] > 0 && side[2] > 0) {
-//       q.x = inTri[1].x - side[1] * (inTri[0].x - inTri[1].x) / (side[0] - side[1]);
-//       q.y = inTri[1].y - side[1] * (inTri[0].y - inTri[1].y) / (side[0] - side[1]);
-//       q.z = inTri[1].z - side[1] * (inTri[0].z - inTri[1].z) / (side[0] - side[1]);
-//       inTri[0] = q;
-//       q.x = inTri[1].x - side[1] * (inTri[2].x - inTri[1].x) / (side[2] - side[1]);
-//       q.y = inTri[1].y - side[1] * (inTri[2].y - inTri[1].y) / (side[2] - side[1]);
-//       q.z = inTri[1].z - side[1] * (inTri[2].z - inTri[1].z) / (side[2] - side[1]);
-//       inTri[2] = q;
-//       return(3);
-//    }
-//    //CASE 7
-//    /* Is p2 the only point on the not-clipped side */
-//    if (side[2] < 0 && side[0] > 0 && side[1] > 0) {
-//       q.x = inTri[2].x - side[2] * (inTri[1].x - inTri[2].x) / (side[1] - side[2]);
-//       q.y = inTri[2].y - side[2] * (inTri[1].y - inTri[2].y) / (side[1] - side[2]);
-//       q.z = inTri[2].z - side[2] * (inTri[1].z - inTri[2].z) / (side[1] - side[2]);
-//       inTri[1] = q;
-//       q.x = inTri[2].x - side[2] * (inTri[0].x - inTri[2].x) / (side[0] - side[2]);
-//       q.y = inTri[2].y - side[2] * (inTri[0].y - inTri[2].y) / (side[0] - side[2]);
-//       q.z = inTri[2].z - side[2] * (inTri[0].z - inTri[2].z) / (side[0] - side[2]);
-//       inTri[0] = q;
-//       return(3);
-//    }
-//    //NULL CASE
-//    /* Shouldn't get here */
-//    return(-1);
-// }
