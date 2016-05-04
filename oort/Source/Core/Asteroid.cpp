@@ -58,7 +58,8 @@ void Asteroid::update() {
 			}
 			if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
-				std::cout << context->getTheObject()->getName() << " hit " << name << std::endl;
+				this->gameManager->playSound(SoundManager::ASTEROID_HIT);
+				// std::cout << context->getTheObject()->getName() << " hit " << name << std::endl;
 				context->getTheObject()->setStatus(false);
 				simulator->removeObject(context->getTheObject());
 				simulator->removeObject(this);
@@ -67,7 +68,7 @@ void Asteroid::update() {
 			if( context->getTheObject()->getType() == GameObject::SPACESHIP_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
 				simulator->removeObject(this);
-				std::cout << "Spaceship hit: " << name << std::endl;
+				// std::cout << "Spaceship hit: " << name << std::endl;
 				this->gameManager->loseALife();
 				if(this->gameManager->getLives() <= 0){
 					context->getTheObject()->setStatus(false);

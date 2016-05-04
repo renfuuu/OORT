@@ -25,4 +25,5 @@ public:
 	virtual void update();
 	virtual void moveSpaceship(OISManager* _oisManager, int height, int width, Ogre::SceneNode* cam);
 	void updateChaseCam(Ogre::SceneNode * cam);
+	void setVelocity(int);
 };

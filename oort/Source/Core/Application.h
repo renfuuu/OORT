@@ -95,6 +95,7 @@ public:
 	int camChange;
 	int laserCount;
 	int asteroidCount;
+	int respawnN;
 
 	double fps = 300.0;
 
@@ -112,6 +113,7 @@ public:
 	Asteroid* createAsteroid(Ogre::String nme, GameObject::objectType tp, Ogre::String meshName, Ogre::Vector3 position, Ogre::Vector3 rotate, Ogre::Real scale, Ogre::SceneManager* scnMgr, GameManager* ssm, Ogre::Real mss, Ogre::Real rest, Ogre::Real frict, bool kinematic, Simulator* mySim);
 	void generateAsteroids(int);
 	void clearAsteroids();
+	void clearLasers();
 
 	void setupWindowRendererSystem(void);
 	void setupResources(void);

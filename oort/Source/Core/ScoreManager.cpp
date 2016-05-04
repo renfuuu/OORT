@@ -7,19 +7,19 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 
 	/* Load Score Resources */
 
-	// highScoreFile.open("highscore.txt", std::ios::in);
+	highScoreFile.open("highscore.txt", std::ios::in);
 
-	// std::string line;
-	// while(getline(highScoreFile, line)) {
-	// 	if(line == "") {
-	// 		highScore = 0;
-	// 	}
-	// 	else {
-	// 		highScore = std::stoi(line);
-	// 	}
-	// }
+	std::string line;
+	while(getline(highScoreFile, line)) {
+		if(line == "") {
+			highScore = 0;
+		}
+		else {
+			highScore = std::stoi(line);
+		}
+	}
 
-	// highScoreFile.close();
+	highScoreFile.close();
 	// Ogre::Overlay* ov = Ogre::OverlayManager::getSingletonPtr()->create("Overlay");
 	// ov->show();
 
@@ -38,10 +38,10 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 	CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(1, 0))));
 	gameScoreboard->setText("Points: 0");
 
-	// opponentScoreboard = wmgr.createWindow("AlfiskoSkin/Label", "Blue");
-	// opponentScoreboard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.8f, 0), CEGUI::UDim(0.92f, 0)),
-	// CEGUI::UVector2(CEGUI::UDim(1, 0), CEGUI::UDim(1, 0))));
-	// opponentScoreboard->setText("Blue: 0");
+	highscoreBoard = wmgr.createWindow("AlfiskoSkin/Label", "HighScore");
+	highscoreBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.35f, 0), CEGUI::UDim(0.92f, 0)),
+	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(1, 0))));
+	highscoreBoard->setText("High Score: 0");
 
 	youWinBoard = wmgr.createWindow("AlfiskoSkin/Editbox", "YouWinBoard");
 	youWinBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.42f, 0), CEGUI::UDim(0.33f, 0)),
@@ -54,7 +54,7 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 	youLoseBoard = wmgr.createWindow("AlfiskoSkin/Editbox", "YouLoseBoard");
 	youLoseBoard->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.42f, 0), CEGUI::UDim(0.33f, 0)),
 		CEGUI::UVector2(CEGUI::UDim(0.58f, 0), CEGUI::UDim(0.4f, 0))));
-	youLoseBoard->setText("    You Lose!");
+	youLoseBoard->setText("  Game Over!");
 	youLoseBoard->setDisabled(true);
 	youLoseBoard->setMouseCursor("AlfiskoSkin/MouseArrow");
 	youLoseBoard->hide();
@@ -66,7 +66,7 @@ ScoreManager::ScoreManager(void) : gameScore(0), highScoreFile(), highScore(0), 
 
 	sheet->addChild(gameScoreboard);
 	sheet->addChild(livesBoard);
-	// sheet->addChild(opponentScoreboard);
+	sheet->addChild(highscoreBoard);
 	sheet->addChild(youWinBoard);
 	sheet->addChild(youLoseBoard);
 }
@@ -97,6 +97,7 @@ void ScoreManager::postScore(void) {
 void ScoreManager::postHighScore(void) {
 	// highScoreOverlay->showOverlay();
 	// highScoreOverlay->setText(highScoreText + std::to_string(highScore));
+	highscoreBoard->setText(highScoreText + std::to_string(highScore));
 }
 
 void ScoreManager::postLives(void){
@@ -125,11 +126,11 @@ bool ScoreManager::floorHit(void) {
 }
 
 void ScoreManager::resetScore(void) {
-	// if ( gameScore > highScore ) {
-	// 	highScore = gameScore;
-	// 	writeScore();
-	// 	postHighScore();
-	// }
+	if ( gameScore > highScore ) {
+		highScore = gameScore;
+		writeScore();
+		postHighScore();
+	}
 	// floorHitCount = 0;
 	gameScore = 0;
 	lives = 5;
@@ -167,9 +168,9 @@ void ScoreManager::gameOver() {
 
 void ScoreManager::writeScore() {
 	// Replace old highscore with new one
-	// highScoreFile.open("highscore.txt", std::ios::out);
-	// highScoreFile << std::to_string(highScore) + "\n";
-	// highScoreFile.close();
+	highScoreFile.open("highscore.txt", std::ios::out);
+	highScoreFile << std::to_string(highScore) + "\n";
+	highScoreFile.close();
 }
 
 int ScoreManager::getLives(){

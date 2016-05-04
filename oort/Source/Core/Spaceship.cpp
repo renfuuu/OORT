@@ -3,7 +3,7 @@
 #include "SceneHelper.h"
 
 #define MIN_VELOCITY 0.1
-#define MAX_VELOCITY 35.0
+#define MAX_VELOCITY 25.0
 
 //TODO add max acceleration
 //TODO add min acceleration
@@ -156,4 +156,8 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 
 	updateTransform();
+}
+
+void Spaceship::setVelocity(int i){
+	velocity = i;
 }

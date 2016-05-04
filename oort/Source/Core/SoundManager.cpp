@@ -28,16 +28,16 @@ SoundManager::SoundManager(void) {
 	/* Load music & sound effects */
 
 #ifdef __linux__
-	music = Mix_LoadMUS( "../Assets/music_loop.wav" ); 
-	gameSounds[PADDLE_BOUNCE] = Mix_LoadWAV("../Assets/ball.wav");
-	gameSounds[WALL_BOUNCE] = Mix_LoadWAV("../Assets/wall.wav");
-	gameSounds[HEADSHOT] = Mix_LoadWAV("../Assets/headshot.wav");
+	music = Mix_LoadMUS( "../Assets/SoundFX/music_loop.wav" ); 
+	gameSounds[GAME_LOSS] = Mix_LoadWAV("../Assets/SoundFX/shipdies.wav");
+	gameSounds[ASTEROID_HIT] = Mix_LoadWAV("../Assets/SoundFX/asteroidhit.wav");
+	gameSounds[LASER_SHOT] = Mix_LoadWAV("../Assets/SoundFX/shootlaser.wav");
 #endif
 #ifdef _WIN32
-	music = Mix_LoadMUS( "../../../Game-Tech-12/Assignment-2/Assets/music_loop.wav" ); 
-	gameSounds[PADDLE_BOUNCE] = Mix_LoadWAV("../../../Game-Tech-12/Assignment-2/Assets/ball.wav");
-	gameSounds[WALL_BOUNCE] = Mix_LoadWAV("../../../Game-Tech-12/Assignment-2/Assets/wall.wav");
-	gameSounds[HEADSHOT] = Mix_LoadWAV("../../../Game-Tech-12/Assignment-2/Assets/headshot.wav");
+	music = Mix_LoadMUS( "../../../teddy/oort/Assets/SoundFX/music_loop.wav" ); 
+	gameSounds[GAME_LOSS] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/shipdies.wav");
+	gameSounds[ASTEROID_HIT] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/asteroidhit.wav");
+	gameSounds[LASER_SHOT] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/shootlaser.wav");
 #endif
 }
 

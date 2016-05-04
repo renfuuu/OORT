@@ -47,18 +47,11 @@ protected:
  	int floorHitCount;
  	bool gameOverB;
 
- 	// Ogre::OverlayContainer* overlayContainer;
- 	// TextOverlay* scoreOverlay;
- 	// TextOverlay* highScoreOverlay;
- 	// TextOverlay* gameOverOverlay;
 	std::string scoreText;
 	Ogre::String scoreLabel;
 	std::string highScoreText;
 	Ogre::String highScoreLabel;
-	// Ogre::String livesLabel;
 	std::string livesText;
-	// Ogre::String gameOverText;
-	// Ogre::String gameOverLabel;
 	std::fstream highScoreFile;
 
 	CEGUI::OgreRenderer* mRenderer;
@@ -67,4 +60,5 @@ protected:
     CEGUI::Window* youWinBoard;
     CEGUI::Window* youLoseBoard;
     CEGUI::Window* livesBoard;
+    CEGUI::Window* highscoreBoard;
 };
