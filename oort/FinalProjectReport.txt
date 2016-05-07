@@ -1,0 +1,7 @@
+Final Project Report:
+
+Details and explains the places where we did better or worse than we expected and why those cases arose:
+The look and feel of the game was an impressive part of this game. We turned our vision into a reality. It is pretty fun and progressively increasing difficulty of the asteroid waves is challenging. 
+
+Unexpected Issues:
+Issues with bullet physics. Collision not as clean as hoped. UV mappings are usualy hand-drawn or created in a different program so the slided meshes did not look pretty with their textures anymore.

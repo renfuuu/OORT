@@ -1,3 +1,14 @@
+TO BUILD AND RUN
+
+chmod u+x create
+./create 
+
+-------or------- 
+
+TO BUILD THEN RUN
+
+mkdir build
+cp -avr Linux-Build-Tools/. build/
 cd build
 chmod u+x buildit makeit
 ./buildit

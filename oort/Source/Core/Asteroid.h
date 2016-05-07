@@ -1,6 +1,9 @@
 #pragma once
 
 #include "GameObject.h"
+#include <stdlib.h>
+#include <time.h>
+
 class Asteroid : public GameObject {
 
 public:

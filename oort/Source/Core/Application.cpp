@@ -19,7 +19,7 @@ using namespace Ogre;
 
 std::string instructions = "* Press C - change the cameras\n* Press M - mute music\n* Press ESC to quit the game\n* Press W & S control the pitch of the Spaceship\n* Press A & D control the yaw  of the Spaceship\n* Press Q & E control the roll of the Spaceship\n* Press left mouse button to fire laser\n* Press Mouse Scroll to throttle up and down the Spaceship's trust to move it along it's current trajectory";
 
-#define MIN_NUM_ASTEROIDS 6
+#define MIN_NUM_ASTEROIDS 20
 
 Application::Application():
 	camChange(0),
@@ -165,6 +165,7 @@ bool Application::frameRenderingQueued(const FrameEvent &evt)
 bool Application::update(const FrameEvent &evt) {
 
 	static float dTime = t1->getMilliseconds();
+	static float dTme = t1->getMilliseconds();
 
 	OIS::KeyCode lastKey = _oisManager->lastKeyPressed();
 
@@ -193,14 +194,10 @@ bool Application::update(const FrameEvent &evt) {
 			return true;
 			break;
 		case SINGLE:
-			// handleAi();
 			break;
 		case ENDGAME:
 			return true;
 			break;
-		// case REPLAY:
-		// 	replayData();
-		// 	break;
 		case HOWTO:
 			return true;
 			break;
@@ -222,130 +219,90 @@ bool Application::update(const FrameEvent &evt) {
 
 
 	if(cameras[camChange % cameras.size()]->getName() == "Spaceship Cam"){
-			_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
-	}
+		_theSpaceship->moveSpaceship(_oisManager, height, width, _camNode);
+	
 
-	//Limit the time to shoot the lasers
-	float temp = t1->getMilliseconds();
-	float tts = 250.0;
-	if ((temp - dTime) >= tts) {
-		if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
-			laserCount ++;
-			_gameManager->playSound(SoundManager::LASER_SHOT);
-			Ogre::String name = "Laser_" + std::to_string(laserCount);
-			createLaser(name, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
-			dTime = temp;
+		//Limit the time to shoot the lasers
+		float temp = t1->getMilliseconds();
+		float tts = 250.0;
+		if ((temp - dTime) >= tts) {
+			if(_oisManager->getMouse()->getMouseState().buttonDown(OIS::MB_Left)){
+				laserCount ++;
+				_gameManager->playSound(SoundManager::LASER_SHOT);
+				Ogre::String name = "Laser_" + std::to_string(laserCount);
+				createLaser(name, GameObject::objectType::LASER_OBJECT, "RectLaser.mesh", _theSpaceship, Ogre::Vector3(10, 45, 60), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+				dTime = temp;
+			}
 		}
-	}
 
 
-
-
-
-	// _camNode->setPosition(_theSpaceship->getNode()->getPosition());
-	// spaceshipCam->lookAt(_theSpaceship->getNode()->getPosition());
-
-	// Small pull toward paddle to make it easier for the player to hit the ball
-	// int pull = 500;
-	// Ogre::Vector3 paddleAttract = (_theSpaceship->getNode()->getPosition() - _theBall->getNode()->getPosition()).normalisedCopy();
-	// int index = 0;
-	for (int li = 0; li < lasers.size(); li++){
-		if(lasers[li]->alive && lasers[li]->getNode()->getPosition().length() < 15000){
-			lasers[li]->moveLaser();
-		}
-		else{
-			// Delete the laser 
-			Ogre::String entName = lasers[li]->getName();
-			lasers[li]->getNode()->detachAllObjects();
-			lasers[li]->getNode()->removeAndDestroyAllChildren();
-			mSceneManager->destroyEntity(entName);
-			mSceneManager->destroyEntity("Particle_"+entName);
-			lasers.erase(lasers.begin() + li);
-			li--;
-		}
-	}
-	// for (std::vector<Laser*>::iterator i = lasers.begin(); i != lasers.end(); ++i)
-	// {
-	// 	if((*i)->alive){
-	// 		(*i)->moveLaser();
-	// 	}
-	// 	else{
-	// 		// Delete the laser 
-	// 		Ogre::String entName = (*i)->getName();
-	// 		(*i)->getNode()->detachAllObjects();
-	// 		(*i)->getNode()->removeAndDestroyAllChildren();
-	// 		mSceneManager->destroyEntity(entName);
-	// 		mSceneManager->destroyEntity("Particle_"+entName);
-
-	// 	}
-	// }
-
-	for (int ai = 0; ai < asteroids.size(); ai++){
-		if(asteroids[ai]->alive){
-			// asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
-		}
-		else{
-			// Delete the laser 
-			Ogre::String entName = asteroids[ai]->getName();
-			asteroids[ai]->getNode()->detachAllObjects();
-			// asteroids[ai]->getNode()->removeAndDestroyAllChildren();
-			mSceneManager->destroyEntity(entName);
-			// mSceneManager->destroyEntity("Particle_"+entName);
-			asteroids.erase(asteroids.begin() + ai);
-			ai--;
-		}
-	}
-
-	//Spawn new Asteroids
-	if(asteroids.size() <= 5){
-		respawnN ++;
-		for(int i = 0; i < respawnN; i++){
-			asteroidCount++;
-			float posX = (float)(-10000 + (rand() % (int)(15000 - (-10000) + 1)));
-			float posY = (float)(rand() % (int)(15000 + 1));
-			float posZ = (float)(-10000 + (rand() % (int)(15000 - (-10000) + 1)));
-
-			// Ogre::Vector3 loc(posX,posY,posZ);
-			// std::cout << "Respawn Asteroid Location: " << loc << std::endl; 
-
-			Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
-
-			if(asteroidCount % 2 == 0){
-				createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+		for (int li = 0; li < lasers.size(); li++){
+			if(lasers[li]->alive && lasers[li]->getNode()->getPosition().length() < 15000){
+				lasers[li]->moveLaser();
 			}
 			else{
-				createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+				// Delete the laser 
+				Ogre::String entName = lasers[li]->getName();
+				lasers[li]->getNode()->detachAllObjects();
+				lasers[li]->getNode()->removeAndDestroyAllChildren();
+				mSceneManager->destroyEntity(entName);
+				mSceneManager->destroyEntity("Particle_"+entName);
+				lasers.erase(lasers.begin() + li);
+				li--;
 			}
 		}
+
+
+		float tmp = t1->getMilliseconds();
+		float ttl = 3000;
+		for (int ai = 0; ai < asteroids.size(); ai++){
+			if(asteroids[ai]->alive){
+				asteroids[ai]->moveAsteroid(_theSpaceship->getNode());
+			}
+			else{
+				if((tmp - dTme) >= ttl){
+					// Delete the asteroid from scene 
+					Ogre::String entName = asteroids[ai]->getName();
+					asteroids[ai]->getNode()->detachAllObjects();
+					mSceneManager->destroyEntity(entName);
+					asteroids.erase(asteroids.begin() + ai);
+					ai--;
+					dTme = tmp;
+				}
+			}
+		}
+
+		//Spawn new Asteroids
+		if(asteroids.size() <= 5){
+			respawnN ++;
+			for(int i = 0; i < respawnN; i++){
+				asteroidCount++;
+				float posX = (float)(-10000 + (rand() % (int)(15000 - (-10000) + 1)));
+				float posY = (float)(rand() % (int)(15000 + 1));
+				float posZ = (float)(-10000 + (rand() % (int)(15000 - (-10000) + 1)));
+
+				// Ogre::Vector3 loc(posX,posY,posZ);
+				// std::cout << "Respawn Asteroid Location: " << loc << std::endl; 
+
+				Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
+
+				// if(asteroidCount % 2 == 0){
+					createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+				// }
+				// else{
+					// createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+				// }
+			}
+		}
+
 	}
 
-
-	// for (std::vector<Asteroid*>::iterator i = asteroids.begin(); i != asteroids.end(); ++i)
-	// {
-	// 	if((*i)->alive){
-	// 		// (*i)->moveAsteroid(_theSpaceship->getNode());
-	// 	}
-	// 	else{
-	// 		// Delete the asteroid
-	// 		Ogre::String entName = (*i)->getName();
-	// 		(*i)->getNode()->detachAllObjects();
-	// 		// (*i)->getNode()->removeAndDestroyAllChildren();
-	// 		mSceneManager->destroyEntity(entName);
-	// 		// mSceneManager->destroyEntity("Particle_"+entName);
-	// 	}
-	// }
 
 	if(!_theSpaceship->alive){
 		setState(ENDGAME);
 		_gameManager->playSound(SoundManager::GAME_LOSS);
 		Ogre::String entName = _theSpaceship->getName();
-		// _theSpaceship->getNode()->detachAllObjects();
-		// _theSpaceship->getNode()->removeAndDestroyAllChildren();
-		// mSceneManager->destroyEntity(entName);
-	}
-
-	
-	
+	}	
 }
 
 bool Application::handleGUI(const FrameEvent &evt) {
@@ -513,11 +470,11 @@ void Application::generateAsteroids(int n){
 
 		Ogre::Vector3 rotate((float)(rand() % 181),(float)(rand() % 181),(float)(rand() % 181));
 
-		if(asteroidCount % 2 == 0){
+		// if(asteroidCount % 2 == 0){
 			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_01.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
-		}
-		else
-			createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
+		// }
+		// else
+			// createAsteroid("Asteroid_" + std::to_string(asteroidCount), GameObject::objectType::ASTEROID_OBJECT, "Stone_04.mesh", Ogre::Vector3(posX, posY, posZ), rotate, 15, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, _simulator);
 
 	}
 }
@@ -664,34 +621,12 @@ void Application::setupCEGUI(void) {
 		CEGUI::UVector2(CEGUI::UDim(0.1f, 0), CEGUI::UDim(0.05f, 0))));
 	quitButton->setText("Quit");
 
-	// ipWindow = wmgr.createWindow("AlfiskoSkin/Label", "ipWindow");
-	// ipWindow->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.92f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(1, 0))));
-	// ipWindow->setText(netManager->getIPstring());
 
 	singlePlayerButton = wmgr.createWindow("AlfiskoSkin/Button", "SinglePlayerButton");
 	singlePlayerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.3f, 0)),
 		CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.35f, 0))));
 	singlePlayerButton->setText("Play the Game");
 
-	// hostServerButton = wmgr.createWindow("AlfiskoSkin/Button", "HostButton");
-	// hostServerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.45f, 0))));
-	// hostServerButton->setText("Host Game");
-
-	// ipText = wmgr.createWindow("AlfiskoSkin/Label", "Ip Label");
-	// ipText->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.525f, 0), CEGUI::UDim(0.45f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.725f, 0), CEGUI::UDim(0.5f, 0))));
-	// ipText->setText("IP Address");
-
-	// ipBox = wmgr.createWindow("AlfiskoSkin/Editbox", "Ip Box");
-	// ipBox->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.45f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.5f, 0))));
-
-	// joinServerButton = wmgr.createWindow("AlfiskoSkin/Button", "JoinButton");
-	// joinServerButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.5f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.55f, 0))));
-	// joinServerButton->setText("Join Game");
 
 	howToButton = wmgr.createWindow("AlfiskoSkin/Button", "HowToButton");
 	howToButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.35f, 0)),
@@ -709,32 +644,18 @@ void Application::setupCEGUI(void) {
 		CEGUI::UVector2(CEGUI::UDim(0.2f, 0), CEGUI::UDim(0.05f, 0))));
 	homeButton->setText("Home");
 
-	// replayButton = wmgr.createWindow("AlfiskoSkin/Button", "ReplayButton");
-	// replayButton->setArea(CEGUI::URect(CEGUI::UVector2(CEGUI::UDim(0.3f, 0), CEGUI::UDim(0.4f, 0)),
-	// 	CEGUI::UVector2(CEGUI::UDim(0.7f, 0), CEGUI::UDim(0.45f, 0))));
-	// replayButton->setText("Watch Replay");
 
 	sheet->addChild(singlePlayerButton);
-	// sheet->addChild(hostServerButton);
-	// sheet->addChild(joinServerButton);
 	sheet->addChild(quitButton);
-	// sheet->addChild(ipBox);
-	// sheet->addChild(ipText);
-	// sheet->addChild(ipWindow);
 	sheet->addChild(homeButton);
-	// sheet->addChild(replayButton);
 	sheet->addChild(howToButton);
 	sheet->addChild(howToText);
 
-	// replayButton->hide();
 	howToText->hide();
 
 	singlePlayerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartSinglePlayer, this));
-	// hostServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::StartServer, this));
-	// joinServerButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::JoinServer, this));
 	quitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Quit, this));
 	homeButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Home, this));
-	// replayButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::Replay, this));
 	howToButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&Application::HowTo, this));
 
 }
@@ -742,12 +663,8 @@ void Application::setupCEGUI(void) {
 void Application::setupCameras(void) {
 
 	spaceshipCam = mSceneManager->createCamera("Spaceship Cam");
-	// mCamera = mSceneManager->createCamera("Main Camera");
-	// Ogre::Camera* cam2 = mSceneManager->createCamera("Cam2");
 	camMan = mSceneManager->createCamera("Camera Man");
 
-	// _camNode = mSceneManager->getRootSceneNode()->createChildSceneNode("Cam Node");
-	// _camNode->attachObject(spaceshipCam);
 
 	// Add viewport and cameras
 	mRenderWindow->addViewport(spaceshipCam);
@@ -755,13 +672,6 @@ void Application::setupCameras(void) {
 	spaceshipCam->setAutoAspectRatio(true);
 	spaceshipCam->setPosition(0, 120, 1800);
 
-	// mCamera->setAutoAspectRatio(true);
-	// mCamera->setPosition(0, 120, 1800);
-
-	// cam2->setAutoAspectRatio(true);
-	// cam2->setPosition(1350, 0, -400);
-	// cam2->yaw(Ogre::Degree(90));
-	// cam2->pitch(Ogre::Degree(15));
 
 	camMan->setAutoAspectRatio(true);
 	camMan->setPosition(0,120,400);
@@ -769,8 +679,6 @@ void Application::setupCameras(void) {
 
 	cameras = std::vector<Ogre::Camera*>();
 	cameras.push_back(spaceshipCam);
-	// cameras.push_back(mCamera);
-	// cameras.push_back(cam2);
 	cameras.push_back(camMan);
 
 	cameraMan = new OgreBites::SdkCameraMan(camMan);
@@ -804,14 +712,6 @@ void Application::setupLighting(void) {
 
 	directionalLight->setDirection(Ogre::Vector3(0, -1, .1));
 
-	// // Add some light
-	// mSceneManager->setAmbientLight(Ogre::ColourValue(0.4, 0.4, 0.4));
-	// mSceneManager->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
-
-	// Ogre::Light* light = mSceneManager->createLight("MainLight");
-	// light->setCastShadows(true);
-	// light->setPosition(0, 500, 0);
-	// light->setType(Ogre::Light::LightTypes::LT_POINT);
 
 }
 
@@ -836,32 +736,6 @@ void Application::createObjects(void) {
 	createWall("rightwall", GameObject::objectType::SIDE_WALL_OBJECT, "sides", 15000, 15000, Ogre::Vector3(7500,7500,0), Ogre::Vector3(0,270,0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, _simulator);
 
 	generateAsteroids(MIN_NUM_ASTEROIDS);
-
-
-	// createRootEntity("stadium", "stadium2.mesh", 0, -592, 0);
-	// mSceneManager->getSceneNode("stadium")->setScale(100,100,100);
-	// mSceneManager->getSceneNode("stadium")->yaw(Ogre::Degree(90));
-	// stadiumFlashes = new StadiumFlashes(mSceneManager);
-
-	// _theBall->startScore();
-
-	// mSceneManager->setSkyDome(true, "Examples/CloudySky", 5, 8);
-
-	// // Test Bullet
-	// _theSpaceship = createPaddle("paddle", GameObject::objectType::PADDLE_OBJECT, "paddle.mesh", 0, 0, 0, 100, mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, true, mySim);
-
-	// _theBall = createBall("ball", GameObject::objectType::BALL_OBJECT, "sphere.mesh", 5, 300, 0, .35, mSceneManager, _gameManager, 1.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("floor", GameObject::objectType::FLOOR_OBJECT, "floor.mesh", 0, -100, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("ceiling", GameObject::objectType::WALL_OBJECT, "ceiling.mesh", 0, 600, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(180), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.5f, 0.8f, false, mySim);
-	// createWall("backwall", GameObject::objectType::BACK_WALL_OBJECT, "backwall.mesh", 0, 300, -1350, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(0), mSceneManager, _gameManager, 0.0f, 0.8f, 0.8f, false, mySim);
-	// createWall("leftwall", GameObject::objectType::WALL_OBJECT, "leftwall.mesh", 600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("rightwall", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("ceiling?", GameObject::objectType::WALL_OBJECT, "rightwall.mesh", -600, 0, -430, Ogre::Vector3(120, 120, 200), Ogre::Degree(0), Ogre::Degree(0), Ogre::Degree(-90), mSceneManager, _gameManager, 0.0f, 1.0f, 0.8f, false, mySim);
-	// createWall("frontwall?", GameObject::objectType::FRONT_WALL_OBJECT, "backwall.mesh", 0, 300, 500, Ogre::Vector3(120, 120, 120), Ogre::Degree(90), Ogre::Degree(0), Ogre::Degree(180), mSceneManager, _gameManager, 0.0f, 0.9f, 0.8f, false, mySim);
-
-
-	// _theBall->startScore();
-
 }
 
 /* 
@@ -872,25 +746,30 @@ bool Application::StartSinglePlayer(const CEGUI::EventArgs &e) {
 
 	begin = true;
 	setState(SINGLE);
+	_gameManager->playSound(SoundManager::MENU);
+	// CEGUI::MouseCursor::getSingleton().hide();
 
-	// gameManager->setServer(true);
 	return true;
 }
 
 bool Application::Quit(const CEGUI::EventArgs& e) {
 
 	mRunning = false;
+	_gameManager->playSound(SoundManager::MENU);
     return true;
 }
 
 bool Application::Home(const CEGUI::EventArgs &e) {
 
 	setState(HOME);
+	_gameManager->playSound(SoundManager::MENU);
+	// CEGUI::MouseCursor::getSingleton().show();
 	return true;
 }
 
 bool Application::HowTo(const CEGUI::EventArgs &e) {
 	setState(HOWTO);
+	_gameManager->playSound(SoundManager::MENU);
 	return true;
 }
 

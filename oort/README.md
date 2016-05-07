@@ -2,10 +2,41 @@
 
 ## Milestone 4.3
 
-### Code and Outside resources used
+### How to Build
+* Refer to "HOW_TO_BUILD" file!
+
+### How to play
+* Press C - change the cameras
+* Press M - mute music
+* Press ESC to quit the game
+* Press W & S control the pitch of the Spaceship
+* Press A & D control the yaw  of the Spaceship
+* Press Q & E control the roll of the Spaceship
+* Press left mouse button to fire laser
+* Press Mouse Scroll to throttle up and down the Spaceship's trust to move it along it's current trajectory
+
+### Progress
+
+#### Summary
+* We created a fun and intuitive space asteroids shooter game.
+
+#### Implemented
+* Change music
+* CEGUI to inform player of score
+* Add asteroids
+* Mesh slicing, mesh manipulation
+* Add world boundaries with planes
+
+#### Code and Outside resources used
 * Spaceship model downloaded from:http://www.blendswap.com/blends/view/75404 credit: DeNapes
 * Code from Itoro's Assignment 3 of CS354R
 * Asteroid model downloaded from:http://www.blendswap.com/blends/view/69608 credit: S2
+* Laser sound http://opengameart.org/content/63-digital-sound-effects-lasers-phasers-space-etc credit: Kenney.nl
+* Loop music Star Fox (1993) - Space Armada OST credit: Hajime Hirasawa
+* Menu click https://www.youtube.com/watch?v=HCqRNkiE0lI credit: Creative Commons Footage, Music, Template, Plugins
+* Star Fox 64 (1997): https://www.youtube.com/watch?v=Lb4UY7Lqs8o
+  * Ship destroyed sound
+  * Asteroid hit sound
 
 ## Milestone 4.2
 

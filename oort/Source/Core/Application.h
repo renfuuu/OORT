@@ -89,6 +89,7 @@ public:
 	std::vector<Ogre::Camera*> cameras;
 	std::vector<Laser*> lasers;
 	std::vector<Asteroid*> asteroids;
+	std::vector<Asteroid*> deadAsteroids;
 
 	MeshSlicer* mSlicer;
 

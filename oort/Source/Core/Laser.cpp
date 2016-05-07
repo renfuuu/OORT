@@ -13,7 +13,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	// Bullet uses half margins for collider
 	auto size = var.getSize() * 2.0;
 
-	shape = new btBoxShape(btVector3(size.x * scale, size.y * scale, size.z * scale));
+	shape = new btBoxShape(btVector3(size.x * scal.x, size.y * scal.y, size.z * scal.z));
 	// Below is to turn on particles. Need to change the default particle type in GameObject.cpp
 	Ogre::SceneNode* particleNode = rootNode->createChildSceneNode("Particle_"+nme);
 	particleNode->attachObject(particle);

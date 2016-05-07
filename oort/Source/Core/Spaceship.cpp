@@ -66,7 +66,7 @@ void Spaceship::moveSpaceship(OISManager* _oisManager, int height, int width, Og
 
 	Ogre::SceneNode* mNode = rootNode;
 
-	if(hitWall && context->getTheObject()->getType() != GameObject::LASER_OBJECT){
+	if(hitWall && context->getTheObject()->getType() != GameObject::LASER_OBJECT && context->getTheObject()->getType != GameObject::ASTEROID_OBJECT){
 
 		mNode->yaw(Ogre::Degree(0.5));
 		yawAngle += Ogre::Degree(0.5);

@@ -32,12 +32,14 @@ SoundManager::SoundManager(void) {
 	gameSounds[GAME_LOSS] = Mix_LoadWAV("../Assets/SoundFX/shipdies.wav");
 	gameSounds[ASTEROID_HIT] = Mix_LoadWAV("../Assets/SoundFX/asteroidhit.wav");
 	gameSounds[LASER_SHOT] = Mix_LoadWAV("../Assets/SoundFX/shootlaser.wav");
+	gameSounds[MENU] = Mix_LoadWAV("../Assets/SoundFX/menu.wav");
 #endif
 #ifdef _WIN32
 	music = Mix_LoadMUS( "../../../teddy/oort/Assets/SoundFX/music_loop.wav" ); 
 	gameSounds[GAME_LOSS] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/shipdies.wav");
 	gameSounds[ASTEROID_HIT] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/asteroidhit.wav");
 	gameSounds[LASER_SHOT] = Mix_LoadWAV("../../../teddy/oort/Assets/SoundFX/shootlaser.wav");
+	gameSounds[MENU] = Mix_LoadWAV("../teddy/oort/Assets/SoundFX/menu.wav");
 #endif
 }
 

@@ -12,7 +12,7 @@
 
 class SoundManager {
 public:
-	enum { SPACESHIP_HIT, ASTEROID_HIT, LASER_SHOT, GAME_WIN, GAME_LOSS, NUM_SOUNDS } sounds;
+	enum { SPACESHIP_HIT, ASTEROID_HIT, LASER_SHOT, GAME_WIN, GAME_LOSS, MENU, NUM_SOUNDS } sounds;
 
 	SoundManager(void);
 	~SoundManager(void);

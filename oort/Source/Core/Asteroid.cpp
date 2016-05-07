@@ -19,7 +19,7 @@ GameObject(nme, tp, scnMgr, ssm, node, ent, ms, sim, mss, rest, frict, scal, kin
 	auto var = ent->getBoundingBox();
 
 	// Bullet uses half margins for collider
-	auto size = var.getSize()*.9;
+	auto size = var.getHalfSize();
 
 	shape = new btBoxShape(btVector3(size.x*scale, size.y*scale, size.z*scale));
 
@@ -53,8 +53,7 @@ void Asteroid::update() {
 		if(previousHit != nullptr) {
 			// Check for wall collision but not twice in a row
 			if( context->getTheObject()->getType() == GameObject::UP_DOWN_WALL_OBJECT || context->getTheObject()->getType() == GameObject::SIDE_WALL_OBJECT /*&& context->getTheObject() != previousHit */) {
-				// gameManager->playSound(GameManager::PADDLE_BOUNCE);
-				// hitWall = true;
+
 			}
 			if( context->getTheObject()->getType() == GameObject::LASER_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
@@ -64,6 +63,13 @@ void Asteroid::update() {
 				simulator->removeObject(context->getTheObject());
 				simulator->removeObject(this);
 				this->gameManager->scorePoints(1);
+
+				Ogre::String entNme = this->getName();
+				rootNode->detachAllObjects();
+				int n = rand() % 100;
+				Ogre::Entity* ogreEntity = sceneMgr->createEntity(entNme + "_" + std::to_string(n), "slicedsavedmesh1");
+				ogreEntity->setCastShadows(true);
+				rootNode->attachObject(ogreEntity);
 			}
 			if( context->getTheObject()->getType() == GameObject::SPACESHIP_OBJECT && context->getTheObject() != previousHit ) {
 				alive = false;
@@ -112,4 +118,3 @@ void Asteroid::moveAsteroid(Ogre::SceneNode* ssNode) {
 
 	updateTransform();
 }
-

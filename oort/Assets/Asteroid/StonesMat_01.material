@@ -1,12 +1,12 @@
 // StonesMat_01 genrated by blender2ogre 0.6.0
 
-material StonesMat_01_ 
+material StonesMat_01 
 {
     receive_shadows on 
 
     technique
     {
-        pass StonesMat_01_
+        pass StonesMat_01
         {
             ambient 1.0 1.0 1.0 1.0
             diffuse 1.0 1.0 1.0 1.0
@@ -42,16 +42,16 @@ material StonesMat_01_
     }
 }
 
-material StonesMat_01 
+material StonesMat_01_ 
 {
     receive_shadows on 
 
     technique
     {
-        pass StonesMat_01
+        pass StonesMat_01_
         {
             ambient 1.0 1.0 1.0 1.0
-            diffuse 1.0 1.0 1.0 .8
+            diffuse 1.0 1.0 1.0 1.0
             specular 1.0 1.0 1.0 1.0 3.75
             emissive 0.0 0.0 0.0 1.0
 
