@@ -1,7 +1,5 @@
 # CS 354R - Oort
 
-Trailer: https://www.youtube.com/watch?v=aAskfroHd4M
-
 ## Milestone 4.3
 
 ### How to Build
