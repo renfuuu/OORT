@@ -2,7 +2,7 @@
 -----------------------------
 Team Member 1: Itoro Esiere
 
-Team Member 2: kaleb Alanis
+Team Member 2: Kaleb Alanis
 
 Description: fun and intuitive space asteroids shooter game.
 
